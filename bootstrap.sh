@@ -143,11 +143,26 @@ install_dotfiles () {
 
 	echo ''
 	printInfo 'Installing dotfiles'
-	echo ''
+
+
+
+	## LINK TO DOTFILES FOLDER IN CASE THEY ARE NOT LOCATED IN ~/.dotfiles
+	dotfiles="$HOME/.dotfiles"
+	if [ -f "$dotfiles" -o -d "$dotfiles" -o -L "$dotfiles" ]
+	then
+		echo ''
+	else
+		local message="Linking $DOTFILES_ROOT to $dotfiles"
+		printInfo "$message"
+		ln -s "$DOTFILES_ROOT" "$dotfiles"
+		echo ''
+	fi
+
+
 
 	## LINK DOT-FILES IN USER DIRECTORIE
 	printInfo ~
-	for src in $(find -H "$DOTFILES_ROOT/home" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
+	for src in $(find -H "$DOTFILES_ROOT/symlink" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
 	do
 		dst="$HOME/.$(basename "${src%.*}")"
 		link_file "$src" "$dst"
@@ -155,12 +170,13 @@ install_dotfiles () {
 	echo ''
 
 
+
 	## LINK INSIDE DOT_FOLDERS INSIDE USER DIRECTORIE
-	for folder in $(find $DOTFILES_ROOT/home/* -maxdepth 0 -type d )
+	for folder in $(find $DOTFILES_ROOT/symlink/* -maxdepth 0 -type d )
 	do
 		dotfolder="$HOME/.$(basename $folder)"
 		printInfo $dotfolder
-		for src in $(find -H "$DOTFILES_ROOT/home/config" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
+		for src in $(find -H "$DOTFILES_ROOT/symlink/config" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
 		do
 			dst="$dotfolder/$(basename "${src%.*}")"
 			link_file "$src" "$dst"
