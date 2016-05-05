@@ -1,3 +1,11 @@
+#    +-----------------------------------+-----------------------------------+
+#    |                                                                       |
+#    |    TMUX configuration file                                            |
+#    |    By: Andres Gongora <andresgongora@uma.es> 		             |
+#    |                                                                       |
+#    +-----------------------------------------------------------------------+
+
+
 
 ################################################################################
 ##                            KEY BINDINGS & SETTINGS                         ##
@@ -10,9 +18,6 @@
 set -g bell-action none
 set -g lock-after-time 1800
 set -g history-limit 30000
-
-
-
 
 
 
@@ -44,20 +49,21 @@ bind -n M-Down select-pane -D
 ## ZOOM
 unbind +
 bind + \
-  new-window -d -n tmux-zoom 'clear && echo TMUX ZOOM && read' \;\
-  swap-pane -s tmux-zoom.0 \;\
-  select-window -t tmux-zoom
+	new-window -d -n tmux-zoom 'clear && echo TMUX ZOOM && read' \;\
+	swap-pane -s tmux-zoom.0 \;\
+	select-window -t tmux-zoom
     
 unbind -
 bind - \
-  last-window \;\
-  swap-pane -s tmux-zoom.0 \;\
-  kill-window -t tmux-zoom
+	last-window \;\
+	swap-pane -s tmux-zoom.0 \;\
+	kill-window -t tmux-zoom
 
 
 ## Kill
 bind k confirm kill-window
 bind K confirm kill-server
+
 
 
 ## MOUSE #######################################################################
@@ -71,15 +77,15 @@ setw -g mouse on
 ## else if program is capturing mouse, simulate mouse with up strokes
 ## else (in normal tmux) enter copy mode
 bind-key -n WheelUpPane \
-    if-shell -Ft= "#{?pane_in_mode,1,#{?mouse_button_flag}}" \
-        "send-keys -Mt=; send-keys -Mt=; send-keys -Mt=" \
-        "if-shell -Ft= '#{alternate_on}' \
-            'send-keys -t= ^y ^y ^y' \
-            'copy-mode -e -t='"
+	if-shell -Ft= "#{?pane_in_mode,1,#{?mouse_button_flag}}" \
+		"send-keys -Mt=; send-keys -Mt=; send-keys -Mt=" \
+		"if-shell -Ft= '#{alternate_on}' \
+			'send-keys -t= ^y ^y ^y' \
+			'copy-mode -e -t='"
 bind-key -n WheelDownPane \
-    if-shell -Ft= "#{?pane_in_mode,1,#{?mouse_button_flag}}" \
-        "send-keys -Mt=; send-keys -Mt=; send-keys -Mt=" \
-        "send-keys -t= ^e ^e ^e"
+	if-shell -Ft= "#{?pane_in_mode,1,#{?mouse_button_flag}}" \
+		"send-keys -Mt=; send-keys -Mt=; send-keys -Mt=" \
+		"send-keys -t= ^e ^e ^e"
 
 
 ## Create new window on right click on the status bar on any other window
@@ -106,13 +112,12 @@ bind-key -n MouseUp2Status kill-window -t=
 ## Enable mouse with 'm' and disable with 'M'
 unbind m
 bind m \
-    set -g mouse on \;\
-    display 'Mouse: ON'
+	set -g mouse on \;\
+	display 'Mouse: ON'
 unbind M
 bind M \
-    set -g mouse off \;\
-    display 'Mouse: OFF'
-
+	set -g mouse off \;\
+	display 'Mouse: OFF'
 
 
 
@@ -151,8 +156,6 @@ set-option -g bell-action none
 ## Window selection menu (usually bound to cb-w)
 setw -g mode-bg colour14
 setw -g mode-fg colour232
-
-
 
 
 
