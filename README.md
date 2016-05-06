@@ -54,14 +54,14 @@ removing the initial dot (.) (it will be added automatically when you run bootst
 ## How to
 
 Any file in **symlink** get renamed and symlinked to your users folder. For example, 
-'symlink/bashrc.symlink' gets linked to '~/.bashrc'. 
+`symlink/bashrc.symlink` gets linked to `~/.bashrc`. 
 
 Also, any files in sobfolders
-get symlinked to they dotfolder equivalent. For example 'symlink/config/locale.conf.symlink' gets
-symlinked to '~/.config/locale.conf' (note that only the first level of files or folders inside 
-'symlink' get renamed with a dot (.) in front).
+get symlinked to they dotfolder equivalent. For example `symlink/config/locale.conf.symlink` gets
+symlinked to `~/.config/locale.conf` (note that only the first level of files or folders inside 
+`symlink` get renamed with a dot (.) in front).
 
-You can even symlink folders. 'symlink/mozilla.symlink/' gets linked to '~/.mozilla/.
+You can even symlink folders. `symlink/mozilla.symlink/` gets linked to `~/.mozilla/`.
 
 
 
