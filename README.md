@@ -42,7 +42,7 @@ git push                                                                # push t
 ```
 
 
-## Structure
+## File and folder structure
 
 - **boostrap.sh**: this is the core of any dotfiles implementation. This script is in charge of 
 linking all your actual dotfiles in place where the system expects to find them.
@@ -56,15 +56,17 @@ removing the initial dot (.) (it will be added automatically when you run bootst
 
 ## How to
 
-Any file in **symlink** get renamed and symlinked to your users folder. For example, 
+Any file in **symlink** gets renamed and symlinked into your users folder. For example, 
 `symlink/bashrc.symlink` gets linked to `~/.bashrc`. 
 
-Also, any files in sobfolders
-get symlinked to they dotfolder equivalent. For example `symlink/config/locale.conf.symlink` gets
+Also, any files in sobfolders get symlinked to their dotfolder equivalent. 
+For example `symlink/config/locale.conf.symlink` gets
 symlinked to `~/.config/locale.conf` (note that only the first level of files or folders inside 
 `symlink` get renamed with a dot (.) in front).
 
 You can even symlink folders. `symlink/mozilla.symlink/` gets linked to `~/.mozilla/`.
+
+
 
 
 
