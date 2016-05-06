@@ -72,6 +72,7 @@ Just dont forget to append `.symlink` to those files and folder you want to get 
 
 ## Thanks
 
-I forked [Zach Holman](https://github.com/holman)' excellent
-[dotfiles](https://github.com/holman/dotfiles) before, the same as he did,
-writing my own. Specially the file-linking part of the script is inspired by his code.
+I used to fork [Zach Holman](https://github.com/holman)' excellent
+[dotfiles](https://github.com/holman/dotfiles) in the past. But after some time following
+his example, I wrote my won implementation to better fit my own needs inspiring myself
+on his code.

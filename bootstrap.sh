@@ -33,6 +33,10 @@
 ####################################################################################################
 #                                          FUNCTIONS                                               #
 ####################################################################################################
+
+## Printing functions are from Zach Holman's dotfiles
+## I really liked their aesthetics
+
 printInfo () 
 {
 	printf "\r	[ \033[00;34m..\033[0m ] $1\n"
@@ -58,6 +62,9 @@ printFail ()
 
 
 
+## linke_file() is heavily copied from Zach Holman's dotfiles. <https://github.com/holman/dotfiles>
+## Copyright (c) Zach Holman, http://zachholman.com
+## The MIT License
 link_file () {
 	local src=$1 dst=$2
 
@@ -138,6 +145,7 @@ link_file () {
 }
 
 
+## I rewrote install_dotfiles () from scarth to fit my needs
 install_dotfiles () {
 	local overwrite_all=false backup_all=false skip_all=false
 
@@ -204,7 +212,7 @@ cd "$(dirname "$0")"
 DOTFILES_ROOT=$(pwd -P)		# Store physical address, avoid symlinks
 
 
-
+## LINK ALL
 install_dotfiles
 
 
