@@ -1,6 +1,6 @@
 # Andy's dotfiles
 
-## Installation
+## Fast installation
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
 script. I recommend clonning the repository into ~/.doftiles, but if you anywhere else, bootstrap
@@ -12,6 +12,9 @@ cd ~/.dotfiles                                                          # cd to 
 chmod +x ./bootstrap                                                    # make script executable
 ./bootstrap                                                             # run script
 ```
+
+
+## Forked installation: sync your own dotfiles with github
 
 Alternatively, if you wish to sync your dotfiles to github (in case you want to sync several
 machines), do the following:
