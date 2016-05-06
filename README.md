@@ -29,11 +29,12 @@ chmod +x ./bootstrap							# make script executable
 ```
 Now, if you want to update changes to your own dotfiles on github
 
-
-
-
-This will symlink the appropriate files in `.dotfiles/home` to your home directory.
-
+```sh
+cd ~/.dotfiles								# cd to your dotfiles folder
+git add .								# add changes
+git commit -m "WRITE YOUR COMMENT HERE"					# commit changes
+git push								# push them to github
+```
 
 
 ## Thanks
