@@ -185,16 +185,16 @@ set -g status-fg colour255
 
 
 ## Show PREFIX on right side when c-b
-set -g status-left '#[fg=colour232,bg=colour202,bold]#{?client_prefix, <Prefix> ,}'
-set -g status-left-length 50
+set -g status-left '#[fg=colour232,bg=colour202,bold]#{?client_prefix, <Prefix> ,}#[fg=colour255,bg=colour234,bold][#S] '
+set -g status-left-length 20
 
 
 ## Show prefix on left & date & time
-set -g status-right '#[fg=colour232,bg=colour202,bold]#{?client_prefix, <Prefix> ,}#[fg=colour255,bg=colour234,bold] %d/%m/%y #[fg=colour255,bg=colour234,bold] %H:%M:%S '
+set -g status-right '#[fg=colour255,bg=colour234,bold] %d/%m/%y #[fg=colour255,bg=colour234,bold] %H:%M:%S #[fg=colour232,bg=colour202,bold]#{?client_prefix, <Prefix> ,}'
 set -g status-right-length 50
 
 ## Show system load and other info
-set-option -g status-right '#(uptime | rev | cut -d":" -f1 | rev | sed s/,//g )'
+#set-option -g status-right '#(uptime | rev | cut -d":" -f1 | rev | sed s/,//g )'
 
 
 ## Selected window
