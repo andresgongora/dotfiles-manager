@@ -66,8 +66,7 @@ symlinked to `~/.config/locale.conf` (note that only the first level of files or
 
 You can even symlink folders. `symlink/mozilla.symlink/` gets linked to `~/.mozilla/`.
 
-
-
+Just dont forget to append `.symlink` to those files and folder you want to get symlinked.
 
 
 
