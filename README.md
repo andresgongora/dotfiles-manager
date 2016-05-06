@@ -1,5 +1,21 @@
 # Andy's dotfiles
 
+Dotfiles are how you personalize and configure your system. Be it your bashrc file
+where you write your favorite aliases or run scripts, or your program's user configuration.
+
+Instead of reconfiguring each of your machines independently, you could manually copy
+all dotfiles from one to another. Or... 
+
+Or you could sync your dotfiles to github and use this simple script to link them in place.
+This way you also have get following benefits:
+
+- You have all your dotfiles in the same place instead of having them spread all over.
+The bootstrap script creates all needed symlinks in the correct places.
+- You have a backup of your dotfiles.
+- You can easily sync several machines with the same configuration.
+
+
+
 ## Fast installation
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
