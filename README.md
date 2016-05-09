@@ -18,7 +18,7 @@ The bootstrap script creates all needed symlinks in the correct places.
 
 
 
-## Fast installation
+## Fast installation: recommended
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
 script. I recommend clonning the repository into ~/.doftiles, but if you anywhere else, bootstrap
