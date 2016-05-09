@@ -18,9 +18,7 @@ The bootstrap script creates all needed symlinks in the correct places.
 
 
 
----------------------------------------
----------------------------------------
-
+\s\s\s\s
 ## Fast installation: recommended
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
