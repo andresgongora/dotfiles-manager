@@ -241,7 +241,6 @@ symlink()
 	
 	if [ -f "$DOTFILES_ROOT/configuration/$(hostname)" ]; then
 		configuration_file="$DOTFILES_ROOT/configuration/$(hostname)"
-
 	else
 		printInfo "Not found. Searching now for:"
 		echo "               "$DOTFILES_ROOT/configuration/default""

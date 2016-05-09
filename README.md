@@ -62,27 +62,19 @@ git push                                                                # push t
 
 - **boostrap.sh**: this is the core of any dotfiles implementation. This script is in charge of 
 linking all your actual dotfiles in place where the system expects to find them.
+- **/configuration**: `bootstrap.sh` searches for configuration files inside this folder. It will
+first search for a file with the same name as the host you are on, and if not found, it will
+search for a configuartion file named `default`.
+- **symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
+use these folder as symlink root.
 - **functions/**: this folder contains some bash functions I like carrying arround, like for example
 colorizing your bash promt. You might delete the whole folder if you dont want it.
-- **symlink**: store all dotfiles you want to be symlinked in this folder. Simply rename them
-removing the initial dot (.) (it will be added automatically when you run bootstrap) and append
-".symlink" to the end of the file or folders name.
 
 
 
 ## How to
 
-Any file in **symlink** gets renamed and symlinked into your users folder. For example, 
-`symlink/bashrc.symlink` gets linked to `~/.bashrc`. 
 
-Also, any files in sobfolders get symlinked to their dotfolder equivalent. 
-For example `symlink/config/locale.conf.symlink` gets
-symlinked to `~/.config/locale.conf` (note that only the first level of files or folders inside 
-`symlink` get renamed with a dot (.) in front).
-
-You can even symlink folders. `symlink/mozilla.symlink/` gets linked to `~/.mozilla/`.
-
-Just dont forget to append `.symlink` to those files and folder you want to get symlinked.
 
 
 
