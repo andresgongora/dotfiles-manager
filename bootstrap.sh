@@ -34,25 +34,25 @@
 #                                          FUNCTIONS                                               #
 ####################################################################################################
 
-## Printing functions are from Zach Holman's dotfiles
+## Printing functions are like Zach Holman's dotfiles
 ## I really liked their aesthetics
 
-printInfo () 
+printInfo ()
 {
 	printf "\r	[ \033[00;34m..\033[0m ] $1\n"
 }
 
-printUser () 
+printUser ()
 {
 	printf "\r	[ \033[0;33m??\033[0m ] $1\n"
 }
 
-printSuccess () 
+printSuccess ()
 {
 	printf "\r\033[2K	[ \033[00;32mOK\033[0m ] $1\n"
 }
 
-printFail () 
+printFail ()
 {
 	printf "\r\033[2K	[\033[0;31mFAIL\033[0m] $1\n"
 	echo ''
@@ -62,9 +62,11 @@ printFail ()
 
 
 
-## linke_file() is heavily copied from Zach Holman's dotfiles. <https://github.com/holman/dotfiles>
+## linke_file() is heavily inspired by Zach Holman's dotfiles. <https://github.com/holman/dotfiles>
 ## Copyright (c) Zach Holman, http://zachholman.com
 ## The MIT License
+## Modified to work when reading files
+## Smaller fixes
 link_file () {
 	local src=$1 dst=$2
 	
@@ -155,13 +157,17 @@ link_file () {
 
 
 
+## Processes a configuration file passed as argument
+## Original function by Andres Gongora
+## Seaches inside /configuration folder for either a configuration file name like this host
+## or alternatively a default configuraiton file if the previous is not found.
 processConfigFile()
 {
 	local config_file=$1
 	local overwrite_all=false backup_all=false skip_all=false
 	
 	echo ''
-	printInfo ">>> "$config_file""
+	printInfo "reading "$config_file""
 	
 	## READ LINE BY LINE
 	while read line || [[ -n "$line" ]]; do
@@ -188,7 +194,11 @@ processConfigFile()
 			
 			if [ -f "$include_file" ]
 			then
+				printInfo "include "$include_file""
 				processConfigFile "$include_file"
+				echo ''
+				printInfo "reading "$config_file""
+				
 			else
 				printFail "Could not include file: "$new_include_file""
 			fi
@@ -217,24 +227,24 @@ processConfigFile()
 
 
 
+## Main function called by bootstrap. All the magic happens here
+## By Andres Gongora
 symlink()
 {
 	echo ''
 	printInfo 'Installing dotfiles'
-	echo ''
 
 
 	## SEARCH FOR CONFIGURATION FILE
 	printInfo "Searching for configuration file:"
-	printInfo "> "$DOTFILES_ROOT/configuration/$(hostname)""
+	echo "               "$DOTFILES_ROOT/configuration/$(hostname)""
 	
 	if [ -f "$DOTFILES_ROOT/configuration/$(hostname)" ]; then
-		printInfo "Found!"
 		configuration_file="$DOTFILES_ROOT/configuration/$(hostname)"
 
 	else
 		printInfo "Not found. Searching now for:"
-		printInfo "> "$DOTFILES_ROOT/configuration/default""
+		echo "               "$DOTFILES_ROOT/configuration/default""
 		
 		if [ -f "$DOTFILES_ROOT/configuration/default" ]; then
 			printInfo "Found!"
@@ -245,7 +255,7 @@ symlink()
 	
 	## PROCESS CONFIGURATION FILE	
 	if [ ! -z $configuration_file ]; then
-		printInfo "Create symlinks specified in configuration file: "$configuration_file""
+		printInfo "Found!"
 		processConfigFile "$configuration_file"
 	else	
 		printFail "No configuration file found"
