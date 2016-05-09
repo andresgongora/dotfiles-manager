@@ -46,7 +46,7 @@ bind -n M-Up select-pane -U
 bind -n M-Down select-pane -D
 
 
-## ZOOM
+
 unbind +
 bind + \
 	new-window -d -n tmux-zoom 'clear && echo TMUX ZOOM && read' \;\
@@ -118,6 +118,12 @@ unbind M
 bind M \
 	set -g mouse off \;\
 	display 'Mouse: OFF'
+	
+	
+## ZOOM: toggle with right click on pane
+unbind-key -n MouseDown3Pane
+bind-key -n MouseDown3Pane  resize-pane -Z -t=
+
 
 
 
@@ -233,9 +239,18 @@ set -g message-command-bg colour232
 ################################################################################
 
 # All new windows started at startup.
-#new -s main -n status htop
-#splitw -h -t 0 watch sensors
-#splitw -v -t 1 watch free -h
+
+## CREATE SYSADMIN SESSION
+#bind j if-shell -t= "has-session -t sysadmin" \
+		"display 'a'" \
+		"new-session -s sysadmin -A ;\
+		 splitw -h -t 0 htop ;\
+		 splitw -v -t 1 "
+
+
+
+
+
 
 #neww
 #neww
