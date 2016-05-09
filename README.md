@@ -1,7 +1,7 @@
 # Andy's dotfiles
-
+  
 ### Ultra simple dotfile manager with even simpler configuration files
-
+  
 Dotfiles are how you personalize and configure your system. Be it your bashrc file
 where you write your favorite aliases or run scripts, or your program's user configuration.
 
@@ -17,7 +17,7 @@ The bootstrap script creates all needed symlinks in the correct places.
 - You can easily sync several machines with the same configuration.
 
 
-
+  
 ## Fast installation: recommended
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
@@ -31,7 +31,7 @@ chmod +x ./bootstrap                                                    # make s
 ./bootstrap                                                             # run script
 ```
 
-
+  
 ## Forked installation: sync your own dotfiles with github
 
 Alternatively, if you wish to sync your dotfiles to github (in case you want to sync several
@@ -59,7 +59,7 @@ git commit -m "WRITE YOUR COMMENT HERE"                                 # commit
 git push                                                                # push them to github
 ```
 
-
+  
 ## File and folder structure
 
 - **boostrap.sh**: this is the core of any dotfiles implementation. This script is in charge of 
@@ -75,7 +75,7 @@ use these folder as symlink root.
 colorizing your bash promt. You might delete the whole folder if you dont want it.
 
 
-
+  
 ## How to
 
 In six simple steps you will be set up! :)
@@ -106,7 +106,7 @@ or by simply copying your doftiles folder to a secure place.
 
 
 
-
+  
 ## Thanks
 
 I used to fork [Zach Holman](https://github.com/holman)' excellent
