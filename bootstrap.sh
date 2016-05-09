@@ -146,13 +146,8 @@ link_file () {
 
 
 ## I rewrote install_dotfiles () from scarth to fit my needs
-install_dotfiles () {
+install_dotfiles_symlink() {
 	local overwrite_all=false backup_all=false skip_all=false
-
-	echo ''
-	printInfo 'Installing dotfiles'
-
-
 
 	## LINK TO DOTFILES FOLDER IN CASE THEY ARE NOT LOCATED IN ~/.dotfiles
 	dotfiles="$HOME/.dotfiles"
@@ -193,6 +188,44 @@ install_dotfiles () {
 	done
 
 
+	echo ''
+	echo '	All installed!'
+	echo ''
+}
+
+install_dotfiles_config() {
+	local overwrite_all=false backup_all=false skip_all=false
+
+	## READ CONFIGURATION FILE
+	while IFS='' read line || [[ -n "$line" ]]; do
+	
+		## IGNORE COMMENTS AND EMPTY LINES
+		[[ "$line" =~ ^#.*$ ]] && continue
+		[[ -z $line ]] && continue 
+	
+	
+		## GET DESTINY FILE. REPLACE ~ IF NEEDED
+		dst=$(echo $line | cut -d " " -f 1)
+		dst="${dst/'~'/$HOME}"
+		
+		
+		## GET SOURCE FILE, RELATIVE TO DOTFILE INSTALLATION
+		src=$(echo $line | cut -d " " -f 2)
+		src="$DOTFILES_ROOT/$src"
+		
+		
+		## MAKE SURE THESE ARE NOT EMPTY
+		[[ -z $dst ]] && continue 
+		[[ -z $src ]] && continue 
+
+		
+		## LINK
+		link_file "$src" "$dst" 
+		
+	done < "configuration"
+	
+
+	echo ''
 	echo '	All installed!'
 	echo ''
 }
@@ -212,8 +245,23 @@ cd "$(dirname "$0")"
 DOTFILES_ROOT=$(pwd -P)		# Store physical address, avoid symlinks
 
 
-## LINK ALL
-install_dotfiles
+echo ''
+printInfo 'Installing dotfiles'
+
+
+
+# CHECK IF CONFIGURATION FILE EXISTS
+if [ -f configuration ];
+then
+	printInfo 'Create symlinks specified in configuration file:\n'
+	install_dotfiles_config	
+else
+	printInfo 'Configuration file does not exist'
+	printInfo 'Installing dotfiles using names terminated in .symlink:'
+	install_dotfiles_symlink
+fi
+
+
 
 
 # EOF
