@@ -69,9 +69,9 @@ first search for a file with the same name as the host you are on, and if not fo
 search for a configuartion file named `default`. This is useful when you want slightly different
 configurations for different machines. Note that configuration files can "include" other 
 configuration files for greater flexibility.
-- **symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
+- **/symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
 use these folder as symlink root.
-- **functions/**: this folder contains some bash functions I like carrying arround, like for example
+- **/functions/**: this folder contains some bash functions I like carrying arround, like for example
 colorizing your bash promt. You might delete the whole folder if you dont want it.
 
 
@@ -80,19 +80,21 @@ colorizing your bash promt. You might delete the whole folder if you dont want i
 
 In six simple steps you will be set up! :)
 
+Because I know you wont read this ;) simply check out my configuration files and how I use them.
+Note that `dell` and `light` are the name of some of my machines.
+
 When reffereing to the `dotfile/` folder, it will be located wherever you have cloned this repository,
 which will be (if you did the fast installation) in `~/.doftiles`. 
 `~` denotes your user's home folder. For example /home/john/.dotfiles/
 
-Because I know you wont read this ;) simply check out my configuration files and how I use them.
 
 
 1. **Copy all files you want to symlink**: copy them into `dotfiles/symlink/`. You may create
 subfolders as required
 2. **Configure your symlinks**: go to `dotfiles/configuration/` and create a file named either
-`default` or alternatively your hosts name. Dotfiles will always look for a configuraiton file
-with the same name as the hosts, and if it finds none it then looks for a default configuration
-file.
+`default.conf` or alternatively YOUR-HOSTS-NAME.conf.
+Dotfiles will always look for a configuraiton file with the same name as the hosts, 
+and if it finds none it then looks for a default configuration file.
 3. **Include additional configuration files**: inside your main configuration file (created in
 step 2) you may add other configuration files using the `include` directive. You may specify
 a full path to the configuration path relative to `dotfiles/configuration/`.

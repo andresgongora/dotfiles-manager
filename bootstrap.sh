@@ -237,17 +237,17 @@ symlink()
 
 	## SEARCH FOR CONFIGURATION FILE
 	printInfo "Searching for configuration file:"
-	echo "               "$DOTFILES_ROOT/configuration/$(hostname)""
+	echo "               "$DOTFILES_ROOT/configuration/$(hostname)".conf"
 	
-	if [ -f "$DOTFILES_ROOT/configuration/$(hostname)" ]; then
-		configuration_file="$DOTFILES_ROOT/configuration/$(hostname)"
+	if [ -f "$DOTFILES_ROOT/configuration/$(hostname).conf" ]; then
+		configuration_file="$DOTFILES_ROOT/configuration/$(hostname).conf"
 	else
 		printInfo "Not found. Searching now for:"
 		echo "               "$DOTFILES_ROOT/configuration/default""
 		
-		if [ -f "$DOTFILES_ROOT/configuration/default" ]; then
+		if [ -f "$DOTFILES_ROOT/configuration/default.conf" ]; then
 			printInfo "Found!"
-			configuration_file="$DOTFILES_ROOT/configuration/default"
+			configuration_file="$DOTFILES_ROOT/configuration/default.conf"
 		fi
 	fi
 	
