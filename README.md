@@ -74,6 +74,20 @@ colorizing your bash promt. You might delete the whole folder if you dont want i
 
 ## How to
 
+1. **Copy all files you want to symlink**: copy them into `dotfiles/symlink/`. You may create
+subfolders as required
+2. **Configure your symlinks**: go to `dotfiles/configuration/` and create a file named either
+`default` or alternatively your hosts name. Dotfiles will always look for a configuraiton file
+with the same name as the hosts, and if it finds none it then looks for a default configuration
+file.
+3. **Include additional configuration files**: inside your main configuration file (created in
+step 2) you may add other configuration files using the `include` directive. You may specify
+a full path to the configuration path relative to `dotfiles/configuration/`.
+4. **Create symlinks**: simply write inside your configuration, in one line, where to create the
+symlink (full path) and which file to symlink to (path relative to `dotfiles/symlink/`).
+5. **Execute bootstrap**: the script may prompt you if any conflict is detected.
+6. **Optionally create a backup of your dotfiles**: eaither by pushing your fork to github
+or by simply copying your doftiles folder to a secure place. 
 
 
 
