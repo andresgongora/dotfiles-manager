@@ -19,6 +19,7 @@ The bootstrap script creates all needed symlinks in the correct places.
 
 
 ---------------------------------------
+---------------------------------------
 
 ## Fast installation: recommended
 
