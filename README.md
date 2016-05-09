@@ -1,5 +1,7 @@
 # Andy's dotfiles
 
+### Ultra simple dotfile manager with even simpler configuration files
+
 Dotfiles are how you personalize and configure your system. Be it your bashrc file
 where you write your favorite aliases or run scripts, or your program's user configuration.
 
@@ -77,9 +79,10 @@ colorizing your bash promt. You might delete the whole folder if you dont want i
 In six simple steps you will be set up! :)
 
 When reffereing to the `dotfile/` folder, it will be located wherever you have cloned this repository,
-which will be (if you did the fast installation) in `~/.doftiles`*.
+which will be (if you did the fast installation) in `~/.doftiles`. 
+`~` denotes your user's home folder. For example /home/john/.dotfiles/
 
-* `~` denotes your user's home folder. For example /home/john/.dotfiles/
+Because I know you wont read this ;) simply check out my configuration files and how I use them.
 
 
 1. **Copy all files you want to symlink**: copy them into `dotfiles/symlink/`. You may create
