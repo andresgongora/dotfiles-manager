@@ -1,7 +1,0 @@
-* Replace namebased symlinking with symlink configuraiton files.
-	- Symlink configuration files tell bootstrap how and where to link files.
-	  They contain destination file inside .dotfiles (wherever that be) and
-	  destination file relative to the user's home folder.
-	- The file shall use # for comments, and ingnore those lines
-
-

@@ -67,16 +67,18 @@ printFail ()
 ## The MIT License
 link_file () {
 	local src=$1 dst=$2
-
+	
 	local overwrite= backup= skip=
 	local action=
 
 	## CHECK IF FILE ALREADY EXISTS
 	if [ -f "$dst" -o -d "$dst" -o -L "$dst" ]
 	then
+		
 		## IF GLOBAL CONFIGURATION NOT SET
 		if [ "$overwrite_all" == "false" ] && [ "$backup_all" == "false" ] && [ "$skip_all" == "false" ]
 		then
+		
 			local currentSrc="$(readlink $dst)"
 
 			## IF ALREADY LINKED: SKIP
@@ -86,7 +88,14 @@ link_file () {
 			else
 				printUser "File already exists: $dst ($(basename "$src")), what do you want to do?\n\
 				[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?"
+
+
+				## THIS IS NECESSARY BECAUSE LESE THE INPUT IS TAKEN FROM THE CONFIG FILE
+				exec 6<&0
+				exec 0<"$THISTTY"
 				read -n 1 action
+				exec 0<&6 6<&-
+				
 
 				case "$action" in
 					o )
@@ -102,7 +111,7 @@ link_file () {
 					S )
 						skip_all=true;;
 					* )
-						;;
+						printFail "$action is not a valid option";;
 				esac
 				echo ''
 			fi
@@ -139,96 +148,115 @@ link_file () {
 	## UNLESS SKIP (SYMLINK DOES NOT EXISTS OR FILE MAS REMOVED), CREATE SYMLINK
 	if [ "$skip" != "true" ]	# "false" or empty
 	then
-		ln -s "$1" "$2"
-		printSuccess "linked $1 to $2"
+		ln -s "$src" "$dst"
+		printSuccess "linked $src to $dst"
 	fi
 }
 
 
-## I rewrote install_dotfiles () from scarth to fit my needs
-install_dotfiles_symlink() {
-	local overwrite_all=false backup_all=false skip_all=false
 
-	## LINK TO DOTFILES FOLDER IN CASE THEY ARE NOT LOCATED IN ~/.dotfiles
-	dotfiles="$HOME/.dotfiles"
-	if [ -f "$dotfiles" -o -d "$dotfiles" -o -L "$dotfiles" ]
-	then
-		echo ''
+processConfigFile()
+{
+	local config_file=$1
+	local overwrite_all=false backup_all=false skip_all=false
+	
+	echo ''
+	printInfo ">>> "$config_file""
+	
+	## READ LINE BY LINE
+	while read line || [[ -n "$line" ]]; do
+	
+		## SKIP CERTAIN LINES
+		[[ -z $line ]] && continue 		# empty line
+		[[ "$line" =~ ^#.*$ ]] && continue	# commented line
+		
+		
+		## CUT OUT COMMENTS
+		line=$(echo $line | cut -d "#" -f 1 | tr -d '\n')
+	
+		
+		## LINE DATA
+		word_count=$(echo $line | wc -w)
+		word_1=$(echo $line | cut -d " " -f 1)
+		word_2=$(echo $line | cut -d " " -f 2)
+	
+		
+		## CHECK IF IT IS A INCLUDE STATEMENT
+		if [ "$word_count" -eq 2 ] && [ "$word_1" = "include" ]
+		then
+			include_file="$(dirname ${config_file})/$word_2"
+			
+			if [ -f "$include_file" ]
+			then
+				processConfigFile "$include_file"
+			else
+				printFail "Could not include file: "$new_include_file""
+			fi
+		
+		
+		## CHECK IF IT IS A SYMLINK STATEMENT
+		elif [ "$word_count" -eq 2 ]
+		then
+			dst="${word_1/'~'/$HOME}"
+			src="$DOTFILES_ROOT/symlink/$word_2"
+			
+			link_file $src $dst
+		
+		
+		## THIS LINE COULD NOT BE PROCESSED
+		else
+			printInfo "This line could not be processed:"
+			echo "               > $line"
+		fi
+		
+		
+		
+	done < "$config_file"
+	
+}
+
+
+
+symlink()
+{
+	echo ''
+	printInfo 'Installing dotfiles'
+	echo ''
+
+
+	## SEARCH FOR CONFIGURATION FILE
+	printInfo "Searching for configuration file:"
+	printInfo "> "$DOTFILES_ROOT/configuration/$(hostname)""
+	
+	if [ -f "$DOTFILES_ROOT/configuration/$(hostname)" ]; then
+		printInfo "Found!"
+		configuration_file="$DOTFILES_ROOT/configuration/$(hostname)"
+
 	else
-		local message="Linking $DOTFILES_ROOT to $dotfiles"
-		printInfo "$message"
-		ln -s "$DOTFILES_ROOT" "$dotfiles"
-		echo ''
+		printInfo "Not found. Searching now for:"
+		printInfo "> "$DOTFILES_ROOT/configuration/default""
+		
+		if [ -f "$DOTFILES_ROOT/configuration/default" ]; then
+			printInfo "Found!"
+			configuration_file="$DOTFILES_ROOT/configuration/default"
+		fi
+	fi
+	
+	
+	## PROCESS CONFIGURATION FILE	
+	if [ ! -z $configuration_file ]; then
+		printInfo "Create symlinks specified in configuration file: "$configuration_file""
+		processConfigFile "$configuration_file"
+	else	
+		printFail "No configuration file found"
 	fi
 
-
-
-	## LINK DOT-FILES IN USER DIRECTORIE
-	printInfo ~
-	for src in $(find -H "$DOTFILES_ROOT/symlink" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
-	do
-		dst="$HOME/.$(basename "${src%.*}")"
-		link_file "$src" "$dst"
-	done
-	echo ''
-
-
-
-	## LINK INSIDE DOT_FOLDERS INSIDE USER DIRECTORIE
-	for folder in $(find $DOTFILES_ROOT/symlink/* -maxdepth 0 -type d )
-	do
-		dotfolder="$HOME/.$(basename $folder)"
-		printInfo $dotfolder
-		for src in $(find -H "$DOTFILES_ROOT/symlink/config" -maxdepth 1 -name '*.symlink' -not -path '*.git*')
-		do
-			dst="$dotfolder/$(basename "${src%.*}")"
-			link_file "$src" "$dst"
-		done
-		echo ''
-	done
-
-
+	
 	echo ''
 	echo '	All installed!'
 	echo ''
 }
 
-install_dotfiles_config() {
-	local overwrite_all=false backup_all=false skip_all=false
-
-	## READ CONFIGURATION FILE
-	while IFS='' read line || [[ -n "$line" ]]; do
-	
-		## IGNORE COMMENTS AND EMPTY LINES
-		[[ "$line" =~ ^#.*$ ]] && continue
-		[[ -z $line ]] && continue 
-	
-	
-		## GET DESTINY FILE. REPLACE ~ IF NEEDED
-		dst=$(echo $line | cut -d " " -f 1)
-		dst="${dst/'~'/$HOME}"
-		
-		
-		## GET SOURCE FILE, RELATIVE TO DOTFILE INSTALLATION
-		src=$(echo $line | cut -d " " -f 2)
-		src="$DOTFILES_ROOT/$src"
-		
-		
-		## MAKE SURE THESE ARE NOT EMPTY
-		[[ -z $dst ]] && continue 
-		[[ -z $src ]] && continue 
-
-		
-		## LINK
-		link_file "$src" "$dst" 
-		
-	done < "configuration"
-	
-
-	echo ''
-	echo '	All installed!'
-	echo ''
-}
 
 
 
@@ -243,25 +271,9 @@ set -e
 ## ENTER FOLDER CONTAINING THIS SCRIPTS. FILES TO BE BOOTSTRAPPED ARE EXPECTED TO BE IN SUBFOLDERS
 cd "$(dirname "$0")"
 DOTFILES_ROOT=$(pwd -P)		# Store physical address, avoid symlinks
+THISTTY=$(tty)
 
-
-echo ''
-printInfo 'Installing dotfiles'
-
-
-
-# CHECK IF CONFIGURATION FILE EXISTS
-if [ -f configuration ];
-then
-	printInfo 'Create symlinks specified in configuration file:\n'
-	install_dotfiles_config	
-else
-	printInfo 'Configuration file does not exist'
-	printInfo 'Installing dotfiles using names terminated in .symlink:'
-	install_dotfiles_symlink
-fi
-
-
+symlink
 
 
 # EOF
