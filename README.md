@@ -18,7 +18,6 @@ The bootstrap script creates all needed symlinks in the correct places.
 
 
 
-\s\s\s\s
 ## Fast installation: recommended
 
 To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
@@ -61,9 +60,6 @@ git push                                                                # push t
 ```
 
 
----------------------------------------
-
-
 ## How to
 
 In six simple steps you will be set up! :)
@@ -93,8 +89,6 @@ symlink (full path) and which file to symlink to (path relative to `dotfiles/sym
 or by simply copying your doftiles folder to a secure place. 
 
 
----------------------------------------
-
 
 ## File and folder structure
 
@@ -112,10 +106,6 @@ colorizing your bash promt. You might delete the whole folder if you dont want i
 
 
 
----------------------------------------
-
-
-
 
 
 ## Thanks
@@ -124,3 +114,5 @@ I used to fork [Zach Holman](https://github.com/holman)' excellent
 [dotfiles](https://github.com/holman/dotfiles) in the past. But after some time following
 his example, I wrote my won implementation to better fit my own needs inspiring myself
 on his code.
+
+
