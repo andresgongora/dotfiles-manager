@@ -74,6 +74,14 @@ colorizing your bash promt. You might delete the whole folder if you dont want i
 
 ## How to
 
+In six simple steps you will be set up! :)
+
+When reffereing to the `dotfile/` folder, it will be located wherever you have cloned this repository,
+which will be (if you did the fast installation) in `~/.doftiles`*.
+
+* `~` denotes your user's home folder. For example /home/john/.dotfiles/
+
+
 1. **Copy all files you want to symlink**: copy them into `dotfiles/symlink/`. You may create
 subfolders as required
 2. **Configure your symlinks**: go to `dotfiles/configuration/` and create a file named either
@@ -86,7 +94,7 @@ a full path to the configuration path relative to `dotfiles/configuration/`.
 4. **Create symlinks**: simply write inside your configuration, in one line, where to create the
 symlink (full path) and which file to symlink to (path relative to `dotfiles/symlink/`).
 5. **Execute bootstrap**: the script may prompt you if any conflict is detected.
-6. **Optionally create a backup of your dotfiles**: eaither by pushing your fork to github
+6. **Optionally create a backup of your dotfiles**: either by pushing your fork to github
 or by simply copying your doftiles folder to a secure place. 
 
 
