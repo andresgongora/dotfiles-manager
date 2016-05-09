@@ -66,7 +66,9 @@ git push                                                                # push t
 linking all your actual dotfiles in place where the system expects to find them.
 - **/configuration**: `bootstrap.sh` searches for configuration files inside this folder. It will
 first search for a file with the same name as the host you are on, and if not found, it will
-search for a configuartion file named `default`.
+search for a configuartion file named `default`. This is useful when you want slightly different
+configurations for different machines. Note that configuration files can "include" other 
+configuration files for greater flexibility.
 - **symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
 use these folder as symlink root.
 - **functions/**: this folder contains some bash functions I like carrying arround, like for example
