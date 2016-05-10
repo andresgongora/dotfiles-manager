@@ -67,7 +67,7 @@ In six simple steps you will be set up! :)
 Because I know you wont read this ;) simply check out my configuration files and how I use them.
 Note that `dell` and `light` are the name of some of my machines.
 
-When reffereing to the `dotfile/` folder, it will be located wherever you have cloned this repository,
+When referring to the `dotfile/` folder, it will be located wherever you have cloned this repository,
 which will be (if you did the fast installation) in `~/.doftiles`. 
 `~` denotes your user's home folder. For example /home/john/.dotfiles/
 
@@ -96,7 +96,7 @@ or by simply copying your doftiles folder to a secure place.
 linking all your actual dotfiles in place where the system expects to find them.
 - **/configuration**: `bootstrap.sh` searches for configuration files inside this folder. It will
 first search for a file with the same name as the host you are on, and if not found, it will
-search for a configuartion file named `default`. This is useful when you want slightly different
+search for a configuartion file named `default.conf`. This is useful when you want slightly different
 configurations for different machines. Note that configuration files can "include" other 
 configuration files for greater flexibility.
 - **/symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
