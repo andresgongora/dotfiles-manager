@@ -237,7 +237,10 @@ symlink()
 
 	## LINK TO ~/.dotfiles
 	dotfiles_home="$HOME/.dotfiles"
-	link_file $DOTFILES_ROOT $dotfiles_home
+	if ! [ -f "$dotfiles_home" -o -d "$dotfiles_home" -o -L "$dotfiles_home" ]
+	then 
+		link_file $DOTFILES_ROOT $dotfiles_home
+	fi
 	
 	
 	## SEARCH FOR CONFIGURATION FILE
