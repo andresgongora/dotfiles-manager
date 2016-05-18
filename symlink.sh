@@ -77,88 +77,34 @@
 
 symlink()
 {
-	## CONFIGURATION
-	#local verbose=true #Comment to reduce verbosity
-	local target_file_name="targets"
-	local user_dotfiles_basename="dotfiles"
-
-
-
-
-
 	########################################################################
 	##	parseDir
 	##
 	##	Artguments
 	##	1. dir to parse
 	##
-	## 	parseDir searches for a target manifest file. It will check
-	##	if the current $USER@$HOST is listed to decide if said dir
-	##	and all its content is to be parsed. If it finds no targets
-	##	manifest file, it will continue as if a match was found.
-	##
-	##	Once parsing a folder, it will search for any link.* file and,
-	##	if the file/dir with the same name exist, use the content of
-	##	said link.* file to call the link functio (see further below)
-	##	on it. Note that the link.* file must contain a path.
-	##	If, while parsing a dir, another sub_dir is found without a
-	##	link.*, the script continues downwards.
 	## 
 	########################################################################
 	parseDir()
 	{
 		local dir=$1
 		local dir=$(echo "${dir/\./$PWD}")
-		[ $verbose ] && printInfo "Parsing $dir"
-		local targets_file="${dir}/${targets_file_name}"
+		[ $verbose == true ] && printInfo "Parsing $dir"
 
 
-		## CHECK TARGETS-MANIFETS FILE
-		## * If it does not exist -> Parse dir
-		## * If it exists and
-		##   * $USER@$HOST is listed -> Parse dir
-		##   * $USER@$HOST is NOT listed -> Exit function
-		##
-		if [ -f "$targets_file" ]; then
-			## CHECK FOR HOSTNAME
-			local match=false
-			while read line; do
-				if [[ "${USER}@${HOSTNAME}" == "$line" ]]; then
-					local match=true
-					[ $verbose ] && printSuccess "${USER}@${HOSTNAME} found in targets file. Parsing $dir..."
-					break
-				fi
-			done < "${dir}/${target_file_name}"
-
-			## CHECK IF MATCH FOUND
-			if [ $match == true ]; then
-				: #nop
-			else
-				[ $verbose ] && printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
-				return
-			fi
-		else
-			[ $verbose ] && printWarn "No targets file found. Default behaviour: continue parsing..."		
-		fi
-
-
-		## PARSE DIRECTORY CONTENT
-		## * For every $file in dir
-		##   * If link.$file exists -> Link
-		##   * If link does not exist
-		##     * If it is a dir -> Enter recursively (parseDir)
-		##     * It is another sort of file -> Ignore
-		##
 		for file in "$dir"/*; do
 			[ -e "$file" ] || continue
-			local link_file="$(dirname "$file")/link.$(basename "$file")"
 
-			## IF PAIRED WITH LINK_FILE EXISTS -> LINK
-			if [ -e "$link_file" ]; then
-				local link_target=$(head -n 1 "$link_file")
-				link "$file" "$link_target"
+			## IF FILE
+			## - Check if it matches ${USER}@${HOSTNAME} -> Parse
+			if [ -f "$file" ]; then
+				local file_name=$(basename "$file")			
+				if [ "$file_name" == "${USER}@${HOSTNAME}.config" ]; then
+					[ $verbose ] && printSuccess "Valid configuration file for ${USER}@${HOSTNAME} found: $file"
+					parseConfigFile "$file"
+				fi
 
-			## IF FOLDER WITHOUT LINK_FILE -> PARSE
+			## IF DIR
 			elif [ -d "$file" ]; then
 				parseDir "$file"
 			fi
@@ -171,9 +117,91 @@ symlink()
 
 
 	########################################################################
+	##	parseConfigFile
+	##
+	##	Arguments
+	##	1. configuration file to parse
+	##
+	##	DESCRIPTION PENDING
+	## 
+	########################################################################
+	parseConfigFile()
+	{
+		local config_file=$1
+		local srcs=()
+		local dsts=()
+		local include_configs=()
+		printInfo "Parsing $config_file"
+		
+
+		## READ LINE BY LINE
+		while read line || [[ -n "$line" ]]; do
+
+			## REMOVE COMMENTS, DOUBLE SPACES, AND SKIP EMPTY LINES
+			local line=$(echo "$line" | sed 's/#.*$//g' | sed 's/\s\s*/ /g')
+			[ -z "$line" ] && continue
+
+
+			## SEPARATE LINES
+			local word_count=$(echo "$line" | wc -w)
+			local word_1=$(echo "$line" | cut -d " " -f 1)
+			local word_2=$(echo "$line" | cut -d " " -f 2)
+	
+		
+			## PROCESS LINE
+			## - Check if include -> Save in array for later
+			## - Symlink
+			## - Warn if could not process
+			if [ "$word_count" -eq 2 ] && [ "$word_1" = "include" ]; then
+				new_include_config="$(dirname ${config_file})/$word_2"				
+				if [ -f "$new_include_config" ]; then
+					[ $verbose == true ] && printInfo "Found include statement $line"
+					include_configs=("${include_configs[@]}" "$new_include_config")
+				else
+					printError "Could not include file: $include_file"
+				fi
+
+			elif [ "$word_count" -eq 2 ]; then
+				[ $verbose == true ] && printInfo "Found link statement $line"
+				local dst="${word_1/'~'/$HOME}"
+				local src="$DOTFILES_ROOT/dotfiles/$word_2"	
+				dsts=("${dsts[@]}" "$dst")
+				srcs=("${srcs[@]}" "$src")
+
+			else
+				printWarn "Can not parse line in $config_file: $line"
+			fi
+
+
+		done < "$config_file"
+
+
+		## CREATE LINKS
+		[ $verbose == true ] && printInfo "Create links..."
+		for i in "${!dsts[@]}"; do 
+			local dst="${dsts[$i]}"
+			local src="${srcs[$i]}"
+			link "$dst" "$src" 
+		done				
+
+
+		## PARSE ALL INCLUDES IN ARRAY
+		[ $verbose == true ] && printInfo "Parse included cofiguration files"
+		for include_config in "${include_configs[@]}"; do
+			echo ""
+			parseConfigFile "$include_config"
+		done
+	}
+
+
+
+
+
+
+	########################################################################
 	##	LINK
 	##
-	##	Artguments
+	##	Arguments
 	##	1. src file/dir (original)
 	##	2. dst file/dir (symlink to create)
 	##
@@ -186,8 +214,9 @@ symlink()
 	########################################################################
 	link()
 	{
-		local src=$1 dst=$2
+		local dst=$1 src=$2 
 		local dst=$(echo "${dst/\~/$HOME}" )
+		[ $verbose == true ] && printInfo "Trying to link $dst -> $src"
 
 
 		## CREATE PARENT DIRECTORIES IF NEEDED
@@ -201,6 +230,7 @@ symlink()
 		## DECIDE ACTION TO EXECUTE (by default link, "l")
 		## * If dst exists
 		##   * If dst already points to src, do nothing, "a"
+		##   * If same file (loopback), skip, "s"
 		##   * If dst is a different file/dir
 		##     * If global action not specified -> Ask user
 		##     * If global action defined -> Retrieve gloabl action
@@ -212,8 +242,13 @@ symlink()
 			## readlink: print symbolic link or canonical file name
 			##
 			local dst_link=$(readlink "$dst")
-			if [ "$dst_link" == "$src" ]; then
+			if [  -e "$dst" -a "$dst_link" == "$src" ]; then
 				local action="a"
+
+			## CHECK IF SAME FILE
+			elif [ "$dst" == "$src" ]; then
+				printErr "Trying to link to tiself $dst -> $src"
+				local action="s"
 
 			## IF NOT SYMLINKED, ASK USER WHAT TO DO
 			elif [ -z "$GLOBAL_ACTION" ]; then
@@ -229,9 +264,7 @@ symlink()
 			else
 				local action="${GLOBAL_ACTION:-$action}"
 
-			fi
-
-			
+			fi			
 		fi
 
 
@@ -241,6 +274,7 @@ symlink()
 		##   * Infor user
 		##   * Return early if no symlink needed
 		## * Create symlink
+		##
 		case "$action" in
 			a)		printSuccess "Already linked $dst" 
 					return;;
@@ -261,7 +295,7 @@ symlink()
 		ln -s "$src" "$dst" && printSuccess "$dst -> $src"
 	}
 
-	
+
 
 
 
@@ -269,10 +303,11 @@ symlink()
 	########################################################################
 	## MAIN
 	########################################################################
-	local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-	source "$script_dir/bash-tools/bash-tools/user_io.sh"
+	local verbose=false #Comment to reduce verbosity
+	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
 	printHeader "Linking your dotfiles files..."
-	parseDir "$script_dir/$user_dotfiles_basename"	
+	parseDir "$DOTFILES_ROOT/config"	
 }
 
 
