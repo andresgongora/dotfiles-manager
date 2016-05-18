@@ -232,9 +232,14 @@ processConfigFile()
 symlink()
 {
 	echo ''
-	printInfo 'Installing dotfiles'
+	printInfo 'Installing dotfiles!'
 
 
+	## LINK TO ~/.dotfiles
+	dotfiles_home="$HOME/.dotfiles"
+	link_file $DOTFILES_ROOT $dotfiles_home
+	
+	
 	## SEARCH FOR CONFIGURATION FILE
 	printInfo "Searching for configuration file:"
 	echo "               "$DOTFILES_ROOT/configuration/$(hostname)".conf"

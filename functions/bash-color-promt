@@ -4,6 +4,8 @@
 ## Leading partial directory names are striped off
 ## /home/me/stuff		  -> ~/stuff			   if USER=me
 ## /usr/share/big_dir_name -> ../share/big_dir_name if pwdmaxlen=20
+##
+## Source: WOLFMAN'S color bash promt
 
 
 ## ARRANGE $PWD AND STORE IT IN $NEW_PWD
@@ -33,7 +35,7 @@ bash_prompt_command() {
 }
 
 
-##
+## COLORIZE
 bash_prompt() {
 	case $TERM in
 	xterm*|rxvt*)
@@ -80,7 +82,10 @@ bash_prompt() {
 	local UC=$EMW			# user's color
 	[ $UID -eq "0" ] && UC=$R	# root's color
 	
+	
 	PS1="$TITLEBAR ${EMK}[${UC}\u${EMK}@${UC}\h ${EMC}\${NEW_PWD}${EMK}]${EMC}\\$ ${EMT}"
+	
+
 	# without colors: PS1="[\u@\h \${NEW_PWD}]\\$ "
 	# extra backslash in front of \$ to make bash colorize the prompt
 
