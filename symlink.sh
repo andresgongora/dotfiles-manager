@@ -59,7 +59,7 @@ symlink()
 		local dir=$(echo "${dir/\./$PWD}")
 
 
-		printInfo "Parsing $dir"
+		#printInfo "Parsing $dir"
 
 
 		## CHECK TARGETS FILE
