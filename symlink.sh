@@ -78,21 +78,16 @@ symlink()
 	########################################################################
 	parseDir()
 	{
-		## PARAMETERS
-		
 		local dir=$1
-
-		
-		## CHECK & FIX PARAMETERS
 		local dir=$(echo "${dir/\./$PWD}")
-
-
 		[ $verbose ] && printInfo "Parsing $dir"
 
 
-		## CHECK TARGETS FILE
-		## * If file does not exist or current host is hosted -> Continue
-		## * If file does exist but current host name is not listed -> Return
+		## CHECK TARGETS-MANIFETS FILE
+		## * If it does not exist -> Parse dir
+		## * If it exists and
+		##   * $USER@$HOST is listed -> Parse dir
+		##   * $USER@$HOST is NOT listed -> Exit function
 		##
 		if [ -f "${dir}/${target_file_name}" ]; then
 			## CHECK FOR HOSTNAME
@@ -113,14 +108,16 @@ symlink()
 				return
 			fi
 		else
-			: #printWarn "No targets file found. Default behaviour: continue parsing..."		
+			[ $verbose ] && printWarn "No targets file found. Default behaviour: continue parsing..."		
 		fi
 
 
-		## LINK FILES
-		## * For every file in the dir
-		##   * If link. exists, link
-		##   * If not, and is dir, traverse
+		## PARSE DIRECTORY CONTENT
+		## * For every $file in dir
+		##   * If link.$file exists -> Link
+		##   * If link does not exist
+		##     * If it is a dir -> Enter recursively (parseDir)
+		##     * It is another sort of file -> Ignore
 		##
 		for file in "$dir"/*; do
 			[ -e "$file" ] || continue
@@ -136,7 +133,6 @@ symlink()
 				parseDir "$file"
 			fi
 		done
-
 	}
 
 
@@ -161,9 +157,6 @@ symlink()
 	link()
 	{
 		local src=$1 dst=$2
-
-
-		## CHECK & FIX PARAMETERS
 		local dst=$(echo "${dst/\~/$HOME}" )
 
 
@@ -175,11 +168,12 @@ symlink()
 		fi
 
 
-		## CHECK IF FILE ALREADY EXISTS
-		## If it exists:
-		##	1. Check if not linked already -> Skip
-		##	2. If not linked
-		##		2.A If global action NOT set (e.g. overwrite all) -> ask
+		## DECIDE ACTION TO EXECUTE (by default link, "l")
+		## * If dst exists
+		##   * If dst already points to src, do nothing, "a"
+		##   * If dst is a different file/dir
+		##     * If global action not specified -> Ask user
+		##     * If global action defined -> Retrieve gloabl action
 		##
 		local action="l"
 		if [ -e "$dst" -o  -f "$dst" -o -d "$dst" -o -L "$dst" ]; then
@@ -211,7 +205,12 @@ symlink()
 		fi
 
 
-		## HANDLE FILE
+		## EXECUTE ACTION & LINK
+		## * Handle action
+		##   * Handle conflicting file, if any
+		##   * Infor user
+		##   * Return early if no symlink needed
+		## * Create symlink
 		case "$action" in
 			a)		printSuccess "Already linked $dst" 
 					return;;
@@ -229,17 +228,10 @@ symlink()
 
 			*)		printError "Invalid option '$action'"; exit 1
 		esac
-
-		
-		## LINK
 		ln -s "$src" "$dst" && printSuccess "$dst -> $src"
-
 	}
 
-	local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-	source "$script_dir/bash-tools/bash-tools/user_io.sh"
-
-
+	
 
 
 
@@ -247,7 +239,8 @@ symlink()
 	########################################################################
 	## MAIN
 	########################################################################
-
+	local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	source "$script_dir/bash-tools/bash-tools/user_io.sh"
 	printHeader "Linking your dotfiles files..."
 	parseDir "$script_dir/$user_dotfiles_basename"	
 }
