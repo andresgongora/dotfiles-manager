@@ -81,11 +81,11 @@ symlink()
 			if [ $match == true ]; then
 				: #nop
 			else
-				printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
+				#printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
 				return
 			fi
 		else
-			printWarn "No targets file found. Default behaviour: continue parsing..."		
+			: #printWarn "No targets file found. Default behaviour: continue parsing..."		
 		fi
 
 
