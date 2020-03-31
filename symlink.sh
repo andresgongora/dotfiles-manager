@@ -163,7 +163,7 @@ symlink()
 		## PROCESS FILE
 		local action="${GLOBAL_ACTION:-$action}"
 		case "$action" in
-			a)		printSuccess "Already linked, $dst" 
+			a)		printSuccess "Already linked $dst" 
 					return;;
 
 			s|S)		printInfo "Skipped $src"
