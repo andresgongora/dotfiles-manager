@@ -1,118 +1,183 @@
-# Andy's dotfiles
-
-### Ultra simple dotfile manager with even simpler configuration files
+**andresgongora's dotfiles** is an ultra simple multi-system dotfiles manager
   
-Dotfiles are how you personalize and configure your system. Be it your bashrc file
-where you write your favorite aliases or run scripts, or your program's user configuration.
+Dotfiles are how you personalize and configure your system. Be it your bashrc
+file where you write your favorite aliases or run scripts, or your applications'
+user configuration.
 
-Instead of reconfiguring each of your machines independently, you could manually copy
-all dotfiles from one to another. Or... 
+Instead of reconfiguring each of your machines independently or copying your
+configuration files manually, you can simply use this "dotfiles" helper
+to keep all your sysmtems (or part of them) syncrhonized. These brings the
+following benefits.
 
-Or you could sync your dotfiles to github and use this simple script to link them in place.
-This way you also have get following benefits:
+- All configuration files that are important to YOU are in a single place
+  rather than all over your system. The included `symlink.sh` script will
+  create symbolink links (aka shortcuts) in all the needed places.
+- Dotfiles can be easily synchronized as a git repository.
+- You can easily sync several machines with the same configuration, or decide
+  what parts they should share and what parts are unique. These also applies
+  for different users on the same machine. Now you have full control over your
+  user's configuration and root's configuration.
 
-- You have all your dotfiles in the same place instead of having them spread all over.
-The bootstrap script creates all needed symlinks in the correct places.
-- You have a backup of your dotfiles.
-- You can easily sync several machines with the same configuration.
 
 
 
-## Fast installation: recommended
 
-To install and use my dotfiles, simply clone this repository anywhere you want and run the bootstrap
-script. I recommend clonning the repository into ~/.doftiles, but if you anywhere else, bootstrap
-will create ~/.doftiles as a simlink pointing to your installation. 
+
+<br/><br/>
+<!--------------------------------------+-------------------------------------->
+#                                     Setup
+<!--------------------------------------+-------------------------------------->
+
+To install and use my dotfiles, simply clone this repository anywhere you want 
+(recommended under ~/.dotfiles) with the following command.
 
 ```sh
-git clone https://github.com/andresgongora/dotfiles.git ~/.dotfiles     # clone in ~/.dotfiles
-cd ~/.dotfiles                                                          # cd to new folder
-chmod +x ./bootstrap                                                    # make script executable
-./bootstrap                                                             # run script
+git clone --recursive https://github.com/andresgongora/dotfiles.git ~/.dotfiles
+cd ~/.dotfiles
+```
+
+Then, place all the configuartion files you want under `~/.dotfiles`, fill in
+your `targets` manifest file (if you want) and specify where the links should go
+in the `link.*` files (you have to create them individually). Once everything is 
+setup, symply run `symlink.sh` and follow the instructions on scree.
+
+```sh
+./symlink.sh
 ```
 
 
-## Forked installation: sync your own dotfiles with github
+### Sync with github
 
-Alternatively, if you wish to sync your dotfiles to github (in case you want to sync several
-machines), do the following:
-
-"FORK" this repository on github. If you don't know what forking is, it basically creates
-a separate copy of a git project that does not sync with the original, but with itself instead.
-That is, you get a copy of my dotfiles on your github repository that you can change and update
-at your will.
+If you want to synchronize your files with github, instead of cloning my
+repository, fork it and then clone yours (do not forget to do it recursively,
+as this depends on [bash-tools](https://github.com/andresgongora/bash-tools)).
+Then follow the installation and configuration procedure just as before, and 
+you will be able to push your files to Github or any other site you like.
+This might look like:
 
 Then:
 
 ```sh
-git clone https://github.com/YOURGITHUBUSER/dotfiles.git ~/.dotfiles	# clone your dotfiles in ~/.dotfiles
+git clone --recusrive https://github.com/YOURGITHUBUSER/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles                                                          # cd to new folder
-chmod +x ./bootstrap                                                    # make script executable
-./bootstrap                                                             # run script
 ```
+Add your files, links, targets, etc. and link them
+
+```sh
+./symlink.sh
+```
+
+Now, you may also sync all your files with Github
+
 Now, if you want to update changes to your own dotfiles on github
 
 ```sh
-cd ~/.dotfiles                                                          # cd to your dotfiles folder
-git add .                                                               # add changes
-git commit -m "WRITE YOUR COMMENT HERE"                                 # commit changes
-git push                                                                # push them to github
+cd ~/.dotfiles
+git add .
+git commit -m "Updating my dotfiles"
+git push
 ```
 
 
-## How to
-
-In six simple steps you will be set up! :)
-
-Because I know you wont read this ;) simply check out my configuration files and how I use them.
-Note that `dell` and `light` are the name of some of my machines.
-
-When referring to the `dotfile/` folder, it will be located wherever you have cloned this repository,
-which will be (if you did the fast installation) in `~/.doftiles`. 
-`~` denotes your user's home folder. For example /home/john/.dotfiles/
-
-
-
-1. **Copy all files you want to symlink**: copy them into `dotfiles/symlink/`. You may create
-subfolders as required
-2. **Configure your symlinks**: go to `dotfiles/configuration/` and create a file named either
-`default.conf` or alternatively YOUR-HOSTS-NAME.conf.
-Dotfiles will always look for a configuraiton file with the same name as the hosts, 
-and if it finds none it then looks for a default configuration file.
-3. **Include additional configuration files**: inside your main configuration file (created in
-step 2) you may add other configuration files using the `include` directive. You may specify
-a full path to the configuration path relative to `dotfiles/configuration/`.
-4. **Create symlinks**: simply write inside your configuration, in one line, where to create the
-symlink (full path) and which file to symlink to (path relative to `dotfiles/symlink/`).
-5. **Execute bootstrap**: the script may prompt you if any conflict is detected.
-6. **Optionally create a backup of your dotfiles**: either by pushing your fork to github
-or by simply copying your doftiles folder to a secure place. 
-
-
-
-## File and folder structure
-
-- **boostrap.sh**: this is the core of any dotfiles implementation. This script is in charge of 
-linking all your actual dotfiles in place where the system expects to find them.
-- **/configuration**: `bootstrap.sh` searches for configuration files inside this folder. It will
-first search for a file with the same name as the host you are on, and if not found, it will
-search for a configuartion file named `default.conf`. This is useful when you want slightly different
-configurations for different machines. Note that configuration files can "include" other 
-configuration files for greater flexibility.
-- **/symlink**: store all dotfiles you want to be symlinked in this folder. All configuration files
-use these folder as symlink root.
-- **/functions/**: this folder contains some bash functions I like carrying arround, like for example
-colorizing your bash promt. You might delete the whole folder if you dont want it.
 
 
 
 
+<br/><br/>
+<!--------------------------------------+-------------------------------------->
+#                                    Overview
+<!--------------------------------------+-------------------------------------->
 
-## Thanks
+`symlink.sh` will traverse `./dotfiles` and all subdirectories. 
+If it finds a `targets` manifest file, it will check if the current
+`$USER@$HOST` is listed. If "targgets" exists and there is no match, said
+directory and further subdirectories will be ignored. If there is
+a match, or no "targets" file is present, the it will parse them.
 
-I used to fork [Zach Holman](https://github.com/holman)' excellent
-[dotfiles](https://github.com/holman/dotfiles) in the past. But after some time following
-his example, I wrote my won implementation to better fit my own needs inspiring myself
-on his code.
+In every directory to be parse, the script will search for a `link.*`
+file. Every link file is paired with either a config file (aka dotfile)
+or a direcotory (e.g. `link.bashrc` and `bashrch` are a pair), and contains 
+the path of where said file should be linked to. Files without a `link.` are
+either ignored, or in the case fo directories, treated as subdirectories.
 
+For example:
+```
+Directory tree			File content
+
+dotfiles
+└── andresgongora		
+    ├── misc
+    │   ├── link.locale.conf ─── ~/.config/locale.conf
+    │   └── locale.conf
+    ├── ssh
+    │   └──  ···
+    ├── bashrc
+    ├── link.basrch ──────────── ~/.bashrc
+    ├── link.ssh ─────────────── ~/.ssh
+    ├── loose_file
+    └── targets ──────────────── andresgongora@pc
+```
+
+Assuming the user is called `$USER=andresgongora`, and the host is `$HOST=pc`, 
+this will enter the direrctory `dotfiles`, see no targets manifest, and so enter
+the next subfolder, in this case, `andresgongora`. Here, it checks the `targets`
+manifest, and so decides to parse the folder (this is useful if
+you have separete configs for separate accounts). Here, it will link
+`bashrc` and `ssh/`. Then, it will look for files and dirs without
+a `link.` file. `loose_file` will be ignored, and `misc` will be
+treated as a subfolder, repeating the process all over again (in this
+case it will only link `~/.config/locale.conf`).
+
+
+
+
+
+
+<br/><br/>
+<!--------------------------------------+-------------------------------------->
+#                                   Contribute
+<!--------------------------------------+-------------------------------------->
+
+This project is only possible thanks to the effort and passion of many, 
+including developers, testers, and of course, our beloved coffee machine.
+You can find a detailed list of everyone involved in the development
+in [AUTHORS.md](AUTHORS.md). Thanks to all of you!
+
+If you like this project and want to contribute, you are most welcome to do so.
+
+
+
+### Help us improve
+
+* [Report a bug](https://github.com/andresgongora/synth-shell/issues/new/choose): 
+  if you notice that something is not right, tell us. We'll try to fix it ASAP.
+* Suggest an idea you would like to see in the next release: send us
+  and email or open an [issue](https://github.com/andresgongora/synth-shell/issues)!
+* Become a developer: fork this repo and become an active developer!
+  Take a look at the [issues](https://github.com/andresgongora/synth-shell/issues)
+  for suggestions of where to start. Also, take a look at our 
+  [coding style](coding_style.md).
+* Spread the word: telling your friends is the fastes way to get this code to
+  the people who might enjoy it!
+
+
+
+
+
+
+<br/><br/>
+<!--------------------------------------+-------------------------------------->
+#                                     About
+<!--------------------------------------+--------------------------------------> 
+
+My first version of the script was heavily inspired by 
+[Zach Holman](https://github.com/holman)' dotfiles.
+I modified it to work with configuration files and, over time, added more
+features like multi-user and multi-system compatibility. However, keeping
+track of all the configuration files became very tedious when I had lots of
+machines. As a result, I've rewritten my dotfiles from scratch and this time
+rely on the very directory structure of where I store my files to separate
+(or sahre) my configration between machines. Note that there are many great
+dotfile scripts out there. Mine is just yet another of them. But I had lots
+of fun writing it :)
 
