@@ -151,7 +151,7 @@ symlink()
 			## IF NOT SYMLINKED, ASK USER WHAT TO DO
 			elif [ -z "$GLOBAL_ACTION" ]; then
 
-				local action=$(promptUser "File already exists: $dst ($(basename "$src"))." "[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?" "sSoObB" "")
+				local action=$(promptUser "File already exists: $dst ($(basename "$src"))" "[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?" "sSoObB" "")
 				case "$action" in
 					S|O|B )		GLOBAL_ACTION="$action" ;;
 					s|o|b )		;;
@@ -163,7 +163,7 @@ symlink()
 		## PROCESS FILE
 		local action="${GLOBAL_ACTION:-$action}"
 		case "$action" in
-			a)		printSuccess "$dst already linked" 
+			a)		printSuccess "Already linked, $dst" 
 					return;;
 
 			s|S)		printInfo "Skipped $src"
