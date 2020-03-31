@@ -9,7 +9,7 @@ configuration files manually, you can simply use this "dotfiles" helper
 to keep all your sysmtems (or part of them) syncrhonized. These brings the
 following benefits.
 
-- All configuration files that are important to YOU are in a single place
+- All configuration files that are important to _you_ are in a single place
   rather than all over your system. The included `symlink.sh` script will
   create symbolink links (aka shortcuts) in all the needed places.
 - Dotfiles can be easily synchronized as a git repository.
