@@ -108,7 +108,6 @@ symlink()
 			if [ -e "${file}.to" ]; then
 				: #nop
 			elif [ -d "$file" ]; then
-				echo ""
 				parseDir "$file"
 			fi
 		done
