@@ -29,25 +29,27 @@
 ##	is in the list. If no file is present, it will continue.
 ##
 ##	Then, for every file, if said text file is accompanied by
-##	a text file with the same name but ended in ".to", it will link said
-##	file to wherever the path/name in the ".to" file specifies. This means
+##	a text file with the same name but preceded by ".link", it will link said
+##	file to wherever the path/name in the "link." file specifies. This means
 ##	that the files and the symlink can have different names.
 ##	If the specified path ends in "/", the script will assume you want
 ##	the same name.
 ##
 ##	Symlinking also works for dirs. Just make sure they are accompanied
-##	by a path-file with the same name but ended in ".to".
+##	by a path-file with the same name but preceded by ".link".
 ##
 ##	If symlinking detects a conflict (e.g. the target file already exists)
 ##	it will prompt you.
 ##
 ##	Finally, if inside the current dir is another dir and it does not
-##	have a ".to", the script will call itself recursively.
+##	have a "link.", the script will call itself recursively.
 ##
 
 
 symlink()
 {
+	#verbose=true
+
 	parseDir()
 	{
 		## PARAMETERS
@@ -59,7 +61,7 @@ symlink()
 		local dir=$(echo "${dir/\./$PWD}")
 
 
-		#printInfo "Parsing $dir"
+		[ $verbose ] && printInfo "Parsing $dir"
 
 
 		## CHECK TARGETS FILE
@@ -72,7 +74,7 @@ symlink()
 			while read line; do
 				if [[ "${USER}@${HOSTNAME}" == "$line" ]]; then
 					local match=true
-					#printSuccess "${USER}@${HOSTNAME} found in targets file. Parsing $dir..."
+					[ $verbose ] && printSuccess "${USER}@${HOSTNAME} found in targets file. Parsing $dir..."
 					break
 				fi
 			done < "${dir}/${target_file_name}"
@@ -81,7 +83,7 @@ symlink()
 			if [ $match == true ]; then
 				: #nop
 			else
-				#printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
+				[ $verbose ] && printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
 				return
 			fi
 		else
@@ -91,22 +93,19 @@ symlink()
 
 		## LINK FILES
 		## * For every file in the dir
-		##   * If .to exists, link
+		##   * If link. exists, link
 		##   * If not, and is dir, traverse
 		##
-		## Note: done in two loops to parse files before subfolders
-		##
-		for file in "$dir"/*; do
-			[ -e "$file" ] || continue	
-			if [ -e "${file}.to" ]; then
-				local link_target=$(head -n 1 "${file}.to")
-				link "$file" "$link_target"
-			fi
-		done
 		for file in "$dir"/*; do
 			[ -e "$file" ] || continue
-			if [ -e "${file}.to" ]; then
-				: #nop
+			local link_file="$(dirname "$file")/link.$(basename "$file")"
+
+			## IF PAIRED WITH LINK_FILE EXISTS -> LINK
+			if [ -e "$link_file" ]; then
+				local link_target=$(head -n 1 "$link_file")
+				link "$file" "$link_target"
+
+			## IF FOLDER WITHOUT LINK_FILE -> PARSE
 			elif [ -d "$file" ]; then
 				parseDir "$file"
 			fi
@@ -118,7 +117,6 @@ symlink()
 	link()
 	{
 		local src=$1 dst=$2
-		local action="l"
 
 
 		## CHECK & FIX PARAMETERS
@@ -139,6 +137,7 @@ symlink()
 		##	2. If not linked
 		##		2.A If global action NOT set (e.g. overwrite all) -> ask
 		##
+		local action="l"
 		if [ -e "$dst" -o  -f "$dst" -o -d "$dst" -o -L "$dst" ]; then
 
 			## CHECK IF ALREADY SYMLINKED
@@ -157,11 +156,18 @@ symlink()
 					s|o|b )		;;
 					*)		printError "Invalid option"; exit 1
 				esac
+
+			## UPDATE ACTION WITH GLOBAL IF DEFINED
+			else
+				local action="${GLOBAL_ACTION:-$action}"
+
 			fi
+
+			
 		fi
 
-		## PROCESS FILE
-		local action="${GLOBAL_ACTION:-$action}"
+
+		## HANDLE FILE
 		case "$action" in
 			a)		printSuccess "Already linked $dst" 
 					return;;
