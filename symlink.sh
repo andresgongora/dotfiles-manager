@@ -48,12 +48,38 @@
 
 symlink()
 {
-	#verbose=true
+	## CONFIGURATION
+	#local verbose=true #Comment to reduce verbosity
+	local target_file_name="targets"
+	local user_dotfiles_basename="dotfiles"
 
+
+
+
+
+	########################################################################
+	##	parseDir
+	##
+	##	Artguments
+	##	1. dir to parse
+	##
+	## 	parseDir searches for a target manifest file. It will check
+	##	if the current $USER@$HOST is listed to decide if said dir
+	##	and all its content is to be parsed. If it finds no targets
+	##	manifest file, it will continue as if a match was found.
+	##
+	##	Once parsing a folder, it will search for any link.* file and,
+	##	if the file/dir with the same name exist, use the content of
+	##	said link.* file to call the link functio (see further below)
+	##	on it. Note that the link.* file must contain a path.
+	##	If, while parsing a dir, another sub_dir is found without a
+	##	link.*, the script continues downwards.
+	## 
+	########################################################################
 	parseDir()
 	{
 		## PARAMETERS
-		local target_file_name="targets"
+		
 		local dir=$1
 
 		
@@ -114,6 +140,24 @@ symlink()
 	}
 
 
+
+
+
+
+	########################################################################
+	##	LINK
+	##
+	##	Artguments
+	##	1. src file/dir (original)
+	##	2. dst file/dir (symlink to create)
+	##
+	##	This function creates a symlink from dst to src. However,
+	## 	before linking, it creates the full path to src and
+	##	then checks if the file already exists. If the file is already
+	##	a link (i.e. you have run this script before) it continues
+	##	as normal. If not, it will ask the user what to do.
+	## 
+	########################################################################
 	link()
 	{
 		local src=$1 dst=$2
@@ -196,8 +240,16 @@ symlink()
 	source "$script_dir/bash-tools/bash-tools/user_io.sh"
 
 
+
+
+
+
+	########################################################################
+	## MAIN
+	########################################################################
+
 	printHeader "Linking your dotfiles files..."
-	parseDir "$script_dir/dotfiles"
+	parseDir "$script_dir/$user_dotfiles_basename"	
 }
 
 
