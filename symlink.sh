@@ -110,6 +110,7 @@ symlink()
 		local dir=$1
 		local dir=$(echo "${dir/\./$PWD}")
 		[ $verbose ] && printInfo "Parsing $dir"
+		local targets_file="${dir}/${targets_file_name}"
 
 
 		## CHECK TARGETS-MANIFETS FILE
@@ -118,7 +119,7 @@ symlink()
 		##   * $USER@$HOST is listed -> Parse dir
 		##   * $USER@$HOST is NOT listed -> Exit function
 		##
-		if [ -f "${dir}/${target_file_name}" ]; then
+		if [ -f "$targets_file" ]; then
 			## CHECK FOR HOSTNAME
 			local match=false
 			while read line; do
