@@ -26,17 +26,26 @@
 ##	DESCRIPTION:
 ##	Run this script to symlink all your config files under "dotfiles".
 ##
-##	This script will recursively traverse  in search for any
-##	config file whose name matches "$USER@$HOME.config". Any valid config
-##	file will be parsed line by line. Each line may contain the path
-##	to where you want to place your dotfile (i.e. where the system expects
-##	it), followed by at least one white space and the relative path of your
-##	original file. This later relative path is under "./dotfiles".
-##
-##	THe config file may also have include statements to other, shared,
-##	config file. In this case, the first word must be "include" folled
-##	by the relative path to the config file to be included (again, relative
-##	to "./config/").
+##	`symlink.sh` will traverse `./config` and all subdirectories in search
+##	for any config file whose name matches `$USER@$HOME.config`. Any valid
+##	config file will be parsed line by line. Each line must contain two
+##	paths. The first path is where you want to link your file to
+##	(i.e. where your system expects to find a given file, like for example
+##	`~/.bashrc`). The second path is relative to this folder's `./dotfiles/`
+##	and indicates the "original" file you want to link. Both paths must be
+##	spearated by spaces or tabs. If you want to add spaces _within_ any of
+##	the path, you must escape them with `\` 
+##	(e.g. `/home/user/folder\ with\ many\ spaces/`).
+##	
+##	Your symlink-config files may also have include statements to other
+##	config files that may no longer match `$USER@$HOME.config`. This is
+##	useful if you want to share the configuration among several machines.
+##	To include a config file, just add a line that starts with `include`
+##	followed by the relative path (under `./config/`) to the configuration
+##	file. For example, you can have `.config/bob@pc.config` and 
+##	`.config/bob@laptopt.config` both containing a  single line
+##	`include shared/home.config`, and then a file
+##	`.config/shared/home.config` with your actual symlink configuration.
 ##
 ##
 
