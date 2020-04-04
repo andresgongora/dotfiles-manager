@@ -1,2 +1,4 @@
-dotfiles/andy/
+dotfiles/*/ssh
+dotfiles/*/gnupg
+dotfiles/andy
 config/andy.config
