@@ -36,10 +36,9 @@ git clone --recursive https://github.com/andresgongora/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-Then, place all the configuartion files you want under `~/.dotfiles`, fill in
-your `targets` manifest file (if you want) and specify where the links should go
-in the `link.*` files (you have to create them individually). Once everything is 
-setup, symply run `symlink.sh` and follow the instructions on scree.
+Then, place all the configuartion files you want under `/.config/` and your
+"original" configuration files under `/.dotfiles/`. Finally, run `symlink.sh` 
+and follow the instructions on screen.
 
 ```sh
 ./symlink.sh
@@ -88,45 +87,24 @@ git push
 #                                    Overview
 <!--------------------------------------+-------------------------------------->
 
-`symlink.sh` will traverse `./dotfiles` and all subdirectories. 
-If it finds a `targets` manifest file, it will check if the current
-`$USER@$HOST` is listed. If "targgets" exists and there is no match, said
-directory and further subdirectories will be ignored. If there is
-a match, or no "targets" file is present, the it will parse them.
+`symlink.sh` will traverse `./config` and all subdirectories in search for any
+config file whose name matches `$USER@$HOME.config`. Any valid config file will 
+be parsed line by line. Each line must contain two paths. The first path is
+where you want to link your file to (i.e. where your system expects to find
+a given file, like for example `~/.bashrc`). The second path is relative to
+this folder's `./dotfiles/` and indicates the "original" file you want to link.
+Both paths must be spearated by spaces or tabs. If you want to add spaces
+_within_ any of the path, you must escape them with `\`
+(e.g. `/home/user/folder\ with\ many\ spaces/`).
 
-In every directory to be parse, the script will search for a `link.*`
-file. Every link file is paired with either a config file (aka dotfile)
-or a direcotory (e.g. `link.bashrc` and `bashrch` are a pair), and contains 
-the path of where said file should be linked to. Files without a `link.` are
-either ignored, or in the case fo directories, treated as subdirectories.
-
-For example:
-```
-Directory tree			File content
-
-dotfiles
-└── andresgongora		
-    ├── misc
-    │   ├── link.locale.conf ─── ~/.config/locale.conf
-    │   └── locale.conf
-    ├── ssh
-    │   └──  ···
-    ├── bashrc
-    ├── link.basrch ──────────── ~/.bashrc
-    ├── link.ssh ─────────────── ~/.ssh
-    ├── loose_file
-    └── targets ──────────────── andresgongora@pc
-```
-
-Assuming the user is called `$USER=andresgongora`, and the host is `$HOST=pc`, 
-this will enter the direrctory `dotfiles`, see no targets manifest, and so enter
-the next subfolder, in this case, `andresgongora`. Here, it checks the `targets`
-manifest, and so decides to parse the folder (this is useful if
-you have separete configs for separate accounts). Here, it will link
-`bashrc` and `ssh/`. Then, it will look for files and dirs without
-a `link.` file. `loose_file` will be ignored, and `misc` will be
-treated as a subfolder, repeating the process all over again (in this
-case it will only link `~/.config/locale.conf`).
+Your symlink-config files may also have include statements to other config files
+that may no longer match `$USER@$HOME.config`. This is useful if you want to
+share the configuration among several machines. To include a config file, just
+add a line that starts with `include` followed by the relative path (under 
+`./config/`) to the configuration file. For example, you can have
+`.config/bob@pc.config` and `.config/bob@laptopt.config` both containing a 
+single line `include shared/home.config`, and then a file
+`.config/shared/home.config` with your actual symlink configuration.
 
 
 
@@ -173,11 +151,14 @@ If you like this project and want to contribute, you are most welcome to do so.
 My first version of the script was heavily inspired by 
 [Zach Holman](https://github.com/holman)' dotfiles.
 I modified it to work with configuration files and, over time, added more
-features like multi-user and multi-system compatibility. However, keeping
+features like multi-user and multi-system compatibility. Over time, keeping
 track of all the configuration files became very tedious when I had lots of
-machines. As a result, I've rewritten my dotfiles from scratch and this time
-rely on the very directory structure of where I store my files to separate
-(or sahre) my configration between machines. Note that there are many great
-dotfile scripts out there. Mine is just yet another of them. But I had lots
-of fun writing it :)
+machines. I rewrote the script from scratch to use the very directory structure
+of the repository to set the configuration. It worked and was easy to sync, but
+became even more tedious to manage and debug. In the end, I've rewritten the 
+script again to parse configuration files one more time, but made it a bit
+smarter this time. 
+
+Note that there are many great dotfile scripts out there.
+ Mine is just yet another of them. But I had lots of fun (re)writing it :)
 

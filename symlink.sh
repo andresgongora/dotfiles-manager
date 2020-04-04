@@ -23,142 +23,66 @@
 
 ##
 ##
-##
 ##	DESCRIPTION:
 ##	Run this script to symlink all your config files under "dotfiles".
 ##
-##	This script will traverse "./dotfiles" and all subdirectories. 
-##	If it finds a "targets" manifest file, it will check if the current
-##	$USER@$HOST is listed. If "targgets" exists and there is no match, said
-##	directory and further subdirectories will be ignored. If there is
-##	a match, or no "targets" file is present, the it will parse them.
-##
-##	In every directory to be parse, the script will search for a "link.*"
-##	file. Every link file is paired with either a config file (aka dotfile)
-##	or a direcotory (e.g. link.bashrc and bashrch), and contains the path
-##	of where said file should be linked to. Files without a "link" are
-##	either ignored, or in thec ase fo directories, treated as
-##	subdirectories.
-##
-##
-##
-##	EXAMPLE:                         
-##	Directory tree			File content
-##
-##	dotfiles
-##	└── andresgongora		
-##	    ├── misc
-##	    │   ├── link.locale.conf ─── ~/.config/locale.conf
-##	    │   └── locale.conf
-##	    ├── ssh
-##	    │   └──  ···
-##	    ├── bashrc
-##	    ├── link.basrch ──────────── ~/.bashrc
-##	    ├── link.ssh ─────────────── ~/.ssh
-##	    ├── loose_file
-##	    └── targets ──────────────── andresgongora@pc
+##	`symlink.sh` will traverse `./config` and all subdirectories in search
+##	for any config file whose name matches `$USER@$HOME.config`. Any valid
+##	config file will be parsed line by line. Each line must contain two
+##	paths. The first path is where you want to link your file to
+##	(i.e. where your system expects to find a given file, like for example
+##	`~/.bashrc`). The second path is relative to this folder's `./dotfiles/`
+##	and indicates the "original" file you want to link. Both paths must be
+##	spearated by spaces or tabs. If you want to add spaces _within_ any of
+##	the path, you must escape them with `\` 
+##	(e.g. `/home/user/folder\ with\ many\ spaces/`).
 ##	
-##	Assuming the user is called andresgongora, and the host is pc, this
-##	will enter dotfiles, see no targets manifest, and so enter the next
-##	subfolder, in this case, andresgongora. Here, it checks the targets
-##	manifest, and so decides to parse the folder (this is useful if
-##	you have separete configs for separate accounts). Here, it will link
-##	bashrc and the ssh dir. Then, it will look for files and dirs without
-##	a "link." file. "loose_file" will be ignored, and "misc" will be
-##	treated as a subfolder, repeating the process all over again (in this
-##	case it will only link "~/.config/locale.conf").
-##	
+##	Your symlink-config files may also have include statements to other
+##	config files that may no longer match `$USER@$HOME.config`. This is
+##	useful if you want to share the configuration among several machines.
+##	To include a config file, just add a line that starts with `include`
+##	followed by the relative path (under `./config/`) to the configuration
+##	file. For example, you can have `.config/bob@pc.config` and 
+##	`.config/bob@laptopt.config` both containing a  single line
+##	`include shared/home.config`, and then a file
+##	`.config/shared/home.config` with your actual symlink configuration.
 ##
 ##
-
-
 
 
 
 symlink()
 {
-	## CONFIGURATION
-	#local verbose=true #Comment to reduce verbosity
-	local target_file_name="targets"
-	local user_dotfiles_basename="dotfiles"
-
-
-
-
-
 	########################################################################
 	##	parseDir
 	##
 	##	Artguments
 	##	1. dir to parse
 	##
-	## 	parseDir searches for a target manifest file. It will check
-	##	if the current $USER@$HOST is listed to decide if said dir
-	##	and all its content is to be parsed. If it finds no targets
-	##	manifest file, it will continue as if a match was found.
-	##
-	##	Once parsing a folder, it will search for any link.* file and,
-	##	if the file/dir with the same name exist, use the content of
-	##	said link.* file to call the link functio (see further below)
-	##	on it. Note that the link.* file must contain a path.
-	##	If, while parsing a dir, another sub_dir is found without a
-	##	link.*, the script continues downwards.
+	##	Traverse directory resursively in search for any configuration
+	##	file whose name matches "${USER}@${HOSTNAME}.config".
 	## 
 	########################################################################
 	parseDir()
 	{
 		local dir=$1
 		local dir=$(echo "${dir/\./$PWD}")
-		[ $verbose ] && printInfo "Parsing $dir"
-		local targets_file="${dir}/${targets_file_name}"
+		[ $verbose == true ] && printInfo "Parsing $dir"
 
 
-		## CHECK TARGETS-MANIFETS FILE
-		## * If it does not exist -> Parse dir
-		## * If it exists and
-		##   * $USER@$HOST is listed -> Parse dir
-		##   * $USER@$HOST is NOT listed -> Exit function
-		##
-		if [ -f "$targets_file" ]; then
-			## CHECK FOR HOSTNAME
-			local match=false
-			while read line; do
-				if [[ "${USER}@${HOSTNAME}" == "$line" ]]; then
-					local match=true
-					[ $verbose ] && printSuccess "${USER}@${HOSTNAME} found in targets file. Parsing $dir..."
-					break
-				fi
-			done < "${dir}/${target_file_name}"
-
-			## CHECK IF MATCH FOUND
-			if [ $match == true ]; then
-				: #nop
-			else
-				[ $verbose ] && printWarn "${USER}@${HOSTNAME} not in target file. Skipping..."
-				return
-			fi
-		else
-			[ $verbose ] && printWarn "No targets file found. Default behaviour: continue parsing..."		
-		fi
-
-
-		## PARSE DIRECTORY CONTENT
-		## * For every $file in dir
-		##   * If link.$file exists -> Link
-		##   * If link does not exist
-		##     * If it is a dir -> Enter recursively (parseDir)
-		##     * It is another sort of file -> Ignore
-		##
 		for file in "$dir"/*; do
 			[ -e "$file" ] || continue
-			local link_file="$(dirname "$file")/link.$(basename "$file")"
 
-			## IF PAIRED WITH LINK_FILE EXISTS -> LINK
-			if [ -e "$link_file" ]; then
-				local link_target=$(head -n 1 "$link_file")
-				link "$file" "$link_target"
+			## IF FILE
+			## - Check if it matches ${USER}@${HOSTNAME} -> Parse
+			if [ -f "$file" ]; then
+				local file_name=$(basename "$file")			
+				if [ "$file_name" == "${USER}@${HOSTNAME}.config" ]; then
+					[ $verbose ] && printSuccess "Valid configuration file for ${USER}@${HOSTNAME} found: $file"
+					parseConfigFile "$file"
+				fi
 
-			## IF FOLDER WITHOUT LINK_FILE -> PARSE
+			## IF DIR
 			elif [ -d "$file" ]; then
 				parseDir "$file"
 			fi
@@ -171,9 +95,107 @@ symlink()
 
 
 	########################################################################
+	##	parseConfigFile
+	##
+	##	Arguments
+	##	1. configuration file to parse
+	##
+	##	Parses configuration file. For each line, if it contains a pair
+	##	of paths, it creates a simlink from the first to the second. If
+	##	the line starts with an "include" statement followed by a path
+	##	to another configuration file, said file is parsed as well.
+	##
+	##	The path of the configuration files to be included and
+	##	any src file (original to create link to) are relative to
+	##	to dotfiles/config/ and dotfiles/doftfiles respectively.
+	## 
+	##	To ensure orderly processing, all includes and links are first
+	##	added to separate arrays. At the end of this function, these
+	##	arrays are processed (links before includes).
+	##
+	########################################################################
+	parseConfigFile()
+	{
+		local config_file=$1
+		local srcs=()
+		local dsts=()
+		local include_configs=()
+		printInfo "Parsing $config_file"
+		
+
+		## READ LINE BY LINE
+		## -r do not interpret escape characters
+		while read -r line; do
+
+			## REMOVE COMMENTS, DOUBLE SPACES, AND SKIP EMPTY LINES
+			local line=$(echo "$line" | sed 's/#.*$//g; s/\s\s*/ /g')
+			[ -z "$line" ] && continue
+
+
+			## SEPARATE LINES
+			## - To avoid issues with escaped whitespaces, replace them with '\a'
+			## - Separate words
+			## - Restore escaped whitespaces
+			local line=$(echo "$line" | sed 's/\\\ /\a/g')	
+			local word_count=$(echo "$line" | wc -w)
+			local word_1=$(echo "$line" | cut -d " " -f 1 | sed 's/\a/ /g')
+			local word_2=$(echo "$line" | cut -d " " -f 2 | sed 's/\a/ /g')
+		
+		
+			## PROCESS LINE
+			## - Check if include -> Save in array for later
+			## - Symlink
+			## - Warn if could not process
+			if [ "$word_count" -eq 2 ] && [ "$word_1" = "include" ]; then
+				new_include_config="$(dirname ${config_file})/$word_2"				
+				if [ -f "$new_include_config" ]; then
+					[ $verbose == true ] && printInfo "Found include statement $line"
+					include_configs=("${include_configs[@]}" "$new_include_config")
+				else
+					printError "Could not include file: $include_file"
+				fi
+
+			elif [ "$word_count" -eq 2 ]; then
+				[ $verbose == true ] && printInfo "Found link statement $line"
+				local dst="${word_1/'~'/$HOME}"
+				local src="$DOTFILES_ROOT/dotfiles/$word_2"	
+				dsts=("${dsts[@]}" "$dst")
+				srcs=("${srcs[@]}" "$src")
+
+			else
+				printWarn "Can not parse line in $config_file: $line"
+			fi
+
+
+		done < "$config_file"
+
+
+		## CREATE LINKS
+		[ $verbose == true ] && printInfo "Create links..."
+		for i in "${!dsts[@]}"; do 
+			local src="${srcs[$i]}"
+			local dst="${dsts[$i]}"			
+			link "$src" "$dst"
+		done				
+
+
+		## PARSE ALL INCLUDES IN ARRAY
+		[ $verbose == true ] && printInfo "Parse included cofiguration files"
+		for include_config in "${include_configs[@]}"; do
+			echo ""
+			parseConfigFile "$include_config"
+		done
+	}
+
+
+
+
+
+
+	########################################################################
 	##	LINK
 	##
-	##	Artguments
+	##	Arguments
 	##	1. src file/dir (original)
 	##	2. dst file/dir (symlink to create)
 	##
@@ -188,12 +210,20 @@ symlink()
 	{
 		local src=$1 dst=$2
 		local dst=$(echo "${dst/\~/$HOME}" )
+		[ $verbose == true ] && printInfo "Trying to link $dst -> $src"
+
+
+		## CHECK THAT SOURCE FILE EXISTS
+		if [ ! -e "$src" ]; then
+			printError "Failed linking $dst because $src does not exist"
+			return
+		fi
 
 
 		## CREATE PARENT DIRECTORIES IF NEEDED
 		dst_parent_dir=$(dirname "$dst")
 		if [ ! -d "$dst_parent_dir" ]; then
-			printInfo "Creating new directory to link dotfiles into: $dst_parent_dir."
+			printInfo "Creating new directory to link dotfiles into: $dst_parent_dir"
 			mkdir -p "$dst_parent_dir"
 		fi
 
@@ -201,6 +231,7 @@ symlink()
 		## DECIDE ACTION TO EXECUTE (by default link, "l")
 		## * If dst exists
 		##   * If dst already points to src, do nothing, "a"
+		##   * If same file (loopback), skip, "s"
 		##   * If dst is a different file/dir
 		##     * If global action not specified -> Ask user
 		##     * If global action defined -> Retrieve gloabl action
@@ -212,8 +243,13 @@ symlink()
 			## readlink: print symbolic link or canonical file name
 			##
 			local dst_link=$(readlink "$dst")
-			if [ "$dst_link" == "$src" ]; then
+			if [  -e "$dst" -a "$dst_link" == "$src" ]; then
 				local action="a"
+
+			## CHECK IF SAME FILE
+			elif [ "$dst" == "$src" ]; then
+				printErr "Trying to link to tiself $dst -> $src"
+				local action="s"
 
 			## IF NOT SYMLINKED, ASK USER WHAT TO DO
 			elif [ -z "$GLOBAL_ACTION" ]; then
@@ -229,9 +265,7 @@ symlink()
 			else
 				local action="${GLOBAL_ACTION:-$action}"
 
-			fi
-
-			
+			fi			
 		fi
 
 
@@ -241,6 +275,7 @@ symlink()
 		##   * Infor user
 		##   * Return early if no symlink needed
 		## * Create symlink
+		##
 		case "$action" in
 			a)		printSuccess "Already linked $dst" 
 					return;;
@@ -261,7 +296,7 @@ symlink()
 		ln -s "$src" "$dst" && printSuccess "$dst -> $src"
 	}
 
-	
+
 
 
 
@@ -269,10 +304,11 @@ symlink()
 	########################################################################
 	## MAIN
 	########################################################################
-	local script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-	source "$script_dir/bash-tools/bash-tools/user_io.sh"
+	local verbose=false #Comment to reduce verbosity
+	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
 	printHeader "Linking your dotfiles files..."
-	parseDir "$script_dir/$user_dotfiles_basename"	
+	parseDir "$DOTFILES_ROOT/config"	
 }
 
 
