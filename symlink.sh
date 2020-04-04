@@ -83,6 +83,8 @@ symlink()
 	##	Artguments
 	##	1. dir to parse
 	##
+	##	Traverse directory resursively in search for any configuration
+	##	file whose name matches "${USER}@${HOSTNAME}.config".
 	## 
 	########################################################################
 	parseDir()
@@ -122,8 +124,19 @@ symlink()
 	##	Arguments
 	##	1. configuration file to parse
 	##
-	##	DESCRIPTION PENDING
+	##	Parses configuration file. For each line, if it contains a pair
+	##	of paths, it creates a simlink from the first to the second. If
+	##	the line starts with an "include" statement followed by a path
+	##	to another configuration file, said file is parsed as well.
+	##
+	##	The path of the configuration files to be included and
+	##	any src file (original to create link to) are relative to
+	##	to dotfiles/config/ and dotfiles/doftfiles respectively.
 	## 
+	##	To ensure orderly processing, all includes and links are first
+	##	added to separate arrays. At the end of this function, these
+	##	arrays are processed (links before includes).
+	##
 	########################################################################
 	parseConfigFile()
 	{
@@ -135,18 +148,23 @@ symlink()
 		
 
 		## READ LINE BY LINE
-		while read line || [[ -n "$line" ]]; do
+		## -r do not interpret escape characters
+		while read -r line; do
 
 			## REMOVE COMMENTS, DOUBLE SPACES, AND SKIP EMPTY LINES
-			local line=$(echo "$line" | sed 's/#.*$//g' | sed 's/\s\s*/ /g')
+			local line=$(echo "$line" | sed 's/#.*$//g; s/\s\s*/ /g')
 			[ -z "$line" ] && continue
 
 
 			## SEPARATE LINES
+			## - To avoid issues with escaped whitespaces, replace them with '\a'
+			## - Separate words
+			## - Restore escaped whitespaces
+			local line=$(echo "$line" | sed 's/\\\ /\a/g')	
 			local word_count=$(echo "$line" | wc -w)
-			local word_1=$(echo "$line" | cut -d " " -f 1)
-			local word_2=$(echo "$line" | cut -d " " -f 2)
-	
+			local word_1=$(echo "$line" | cut -d " " -f 1 | sed 's/\a/ /g')
+			local word_2=$(echo "$line" | cut -d " " -f 2 | sed 's/\a/ /g')
+		
 		
 			## PROCESS LINE
 			## - Check if include -> Save in array for later
@@ -179,9 +197,9 @@ symlink()
 		## CREATE LINKS
 		[ $verbose == true ] && printInfo "Create links..."
 		for i in "${!dsts[@]}"; do 
-			local dst="${dsts[$i]}"
 			local src="${srcs[$i]}"
-			link "$dst" "$src" 
+			local dst="${dsts[$i]}"			
+			link "$src" "$dst"
 		done				
 
 
@@ -214,15 +232,22 @@ symlink()
 	########################################################################
 	link()
 	{
-		local dst=$1 src=$2 
+		local src=$1 dst=$2
 		local dst=$(echo "${dst/\~/$HOME}" )
 		[ $verbose == true ] && printInfo "Trying to link $dst -> $src"
+
+
+		## CHECK THAT SOURCE FILE EXISTS
+		if [ ! -e "$src" ]; then
+			printError "Failed linking $dst because I couldn't find $src"
+			return
+		fi
 
 
 		## CREATE PARENT DIRECTORIES IF NEEDED
 		dst_parent_dir=$(dirname "$dst")
 		if [ ! -d "$dst_parent_dir" ]; then
-			printInfo "Creating new directory to link dotfiles into: $dst_parent_dir."
+			printInfo "Creating new directory to link dotfiles into: $dst_parent_dir"
 			mkdir -p "$dst_parent_dir"
 		fi
 
