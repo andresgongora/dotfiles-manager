@@ -23,55 +23,22 @@
 
 ##
 ##
-##
 ##	DESCRIPTION:
 ##	Run this script to symlink all your config files under "dotfiles".
 ##
-##	This script will traverse "./dotfiles" and all subdirectories. 
-##	If it finds a "targets" manifest file, it will check if the current
-##	$USER@$HOST is listed. If "targgets" exists and there is no match, said
-##	directory and further subdirectories will be ignored. If there is
-##	a match, or no "targets" file is present, the it will parse them.
+##	This script will recursively traverse  in search for any
+##	config file whose name matches "$USER@$HOME.config". Any valid config
+##	file will be parsed line by line. Each line may contain the path
+##	to where you want to place your dotfile (i.e. where the system expects
+##	it), followed by at least one white space and the relative path of your
+##	original file. This later relative path is under "./dotfiles".
 ##
-##	In every directory to be parse, the script will search for a "link.*"
-##	file. Every link file is paired with either a config file (aka dotfile)
-##	or a direcotory (e.g. link.bashrc and bashrch), and contains the path
-##	of where said file should be linked to. Files without a "link" are
-##	either ignored, or in thec ase fo directories, treated as
-##	subdirectories.
-##
+##	THe config file may also have include statements to other, shared,
+##	config file. In this case, the first word must be "include" folled
+##	by the relative path to the config file to be included (again, relative
+##	to "./config/").
 ##
 ##
-##	EXAMPLE:                         
-##	Directory tree			File content
-##
-##	dotfiles
-##	└── andresgongora		
-##	    ├── misc
-##	    │   ├── link.locale.conf ─── ~/.config/locale.conf
-##	    │   └── locale.conf
-##	    ├── ssh
-##	    │   └──  ···
-##	    ├── bashrc
-##	    ├── link.basrch ──────────── ~/.bashrc
-##	    ├── link.ssh ─────────────── ~/.ssh
-##	    ├── loose_file
-##	    └── targets ──────────────── andresgongora@pc
-##	
-##	Assuming the user is called andresgongora, and the host is pc, this
-##	will enter dotfiles, see no targets manifest, and so enter the next
-##	subfolder, in this case, andresgongora. Here, it checks the targets
-##	manifest, and so decides to parse the folder (this is useful if
-##	you have separete configs for separate accounts). Here, it will link
-##	bashrc and the ssh dir. Then, it will look for files and dirs without
-##	a "link." file. "loose_file" will be ignored, and "misc" will be
-##	treated as a subfolder, repeating the process all over again (in this
-##	case it will only link "~/.config/locale.conf").
-##	
-##
-##
-
-
 
 
 
@@ -239,7 +206,7 @@ symlink()
 
 		## CHECK THAT SOURCE FILE EXISTS
 		if [ ! -e "$src" ]; then
-			printError "Failed linking $dst because I couldn't find $src"
+			printError "Failed linking $dst because $src does not exist"
 			return
 		fi
 
