@@ -1,4 +1,11 @@
+################################################################################
+#
+################################################################################
+
+## andy
 dotfiles/*/ssh
 dotfiles/*/gnupg
 dotfiles/andy
-config/andy.config
+dotfiles/box
+config/andy*
+config/box*
