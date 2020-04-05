@@ -10,3 +10,4 @@ dotfiles/*/*/gnupg/
 dotfiles/*/*/*/ssh/
 dotfiles/*/*/*/gnupg/
 dotfiles/andy/
+config/andy*
