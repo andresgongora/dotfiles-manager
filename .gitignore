@@ -2,10 +2,11 @@
 #
 ################################################################################
 
+## andy
+dotfiles/*/ssh/
+dotfiles/*/gnupg/
+dotfiles/*/*/ssh/
+dotfiles/*/*/gnupg/
+dotfiles/*/*/*/ssh/
+dotfiles/*/*/*/gnupg/
 
-dotfiles/*/ssh
-dotfiles/*/gnupg
-dotfiles/andy
-dotfiles/box
-config/andy*
-config/box*
