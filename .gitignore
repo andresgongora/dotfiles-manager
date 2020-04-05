@@ -2,12 +2,14 @@
 #
 ################################################################################
 
-## andy
+## Prevent users from uploading dangerous data
 dotfiles/*/ssh/
 dotfiles/*/gnupg/
 dotfiles/*/*/ssh/
 dotfiles/*/*/gnupg/
 dotfiles/*/*/*/ssh/
 dotfiles/*/*/*/gnupg/
+
+## Andy
 dotfiles/andy/
 config/andy*
