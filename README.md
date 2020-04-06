@@ -109,7 +109,8 @@ single line `include shared/home.config`, and then a file
 Optionally, you may run `symlink.sh` on a specific config file even if its name
 does not match the `$USER@$HOME.config` pattern. To do so, simply call the
 script and pass the path to the configuration file as argument. For example,
-assuming you are in the `dotfiles` dir, `./symlink.sh ./config/bob@pc.config`.
+assuming you are in the `dotfiles` dir, 
+`./symlink.sh ./config/example@example.config`.
 
 
 
