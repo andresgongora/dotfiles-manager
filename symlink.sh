@@ -308,14 +308,21 @@ symlink()
 	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
 	
+
+	## LINK FILES
 	printHeader "Linking your dotfiles files..."
 	if [ "$#" -eq 0 ]; then
 		parseDir "$DOTFILES_ROOT/config"
+		ln -s "$DOTFILES_ROOT" "~/.dotfiles" && printSuccess "~/.dotfiles -> $DOTFILES_ROOT"	
+
 	elif  [ "$#" -eq 1 ]; then
 		parseConfigFile "$1"
+
 	else
 		printError "Wrong argument: $@"
 	fi
+
+	
 }
 
 
