@@ -1,4 +1,4 @@
 ## Prevent users from uploading private data
-dotfiles/**/ssh/
-dotfiles/**/gnupg/
+dotfiles/**/ssh/*
+dotfiles/**/gnupg/*
 
