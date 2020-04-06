@@ -100,11 +100,16 @@ _within_ any of the path, you must escape them with `\`
 Your symlink-config files may also have include statements to other config files
 that may no longer match `$USER@$HOME.config`. This is useful if you want to
 share the configuration among several machines. To include a config file, just
-add a line that starts with `include` followed by the relative path (under 
-`./config/`) to the configuration file. For example, you can have
+add a line that starts with `include` followed by the relative path (relative to
+the including config file) to the configuration file. For example, you can have
 `.config/bob@pc.config` and `.config/bob@laptopt.config` both containing a 
 single line `include shared/home.config`, and then a file
 `.config/shared/home.config` with your actual symlink configuration.
+
+Optionally, you may run `symlink.sh` on a specific config file even if its name
+does not match the `$USER@$HOME.config` pattern. To do so, simply call the
+script and pass the path to the configuration file as argument. For example,
+assuming you are in the `dotfiles` dir, `./symlink.sh ./config/bob@pc.config`.
 
 
 
