@@ -313,7 +313,7 @@ symlink()
 	printHeader "Linking your dotfiles files..."
 	if [ "$#" -eq 0 ]; then
 		parseDir "$DOTFILES_ROOT/config"
-		ln -s "$DOTFILES_ROOT" "$HOME/.dotfiles" && printSuccess "$HOME/.dotfiles -> $DOTFILES_ROOT"	
+		link "$DOTFILES_ROOT" "$HOME/.dotfiles"
 
 	elif  [ "$#" -eq 1 ]; then
 		parseConfigFile "$1"
