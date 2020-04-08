@@ -248,7 +248,7 @@ symlink()
 
 			## CHECK IF SAME FILE
 			elif [ "$dst" == "$src" ]; then
-				printErr "Trying to link to tiself $dst -> $src"
+				printError "Trying to link to tiself $dst -> $src"
 				local action="s"
 
 			## IF NOT SYMLINKED, ASK USER WHAT TO DO
