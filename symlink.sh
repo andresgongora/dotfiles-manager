@@ -66,8 +66,7 @@ symlink()
 	parseDir()
 	{
 		local dir=$1
-		local dir=$(echo "${dir/\./$PWD}")
-		[ $verbose == true ] && printInfo "Parsing $dir"
+		[ $verbose == true ] && printInfo "Parsing directory $dir"
 
 
 		for file in "$dir"/*; do
@@ -120,7 +119,7 @@ symlink()
 		local srcs=()
 		local dsts=()
 		local include_configs=()
-		printInfo "Parsing $config_file"
+		printInfo "Parsing configuartion-file $config_file"
 		
 
 		## READ LINE BY LINE
@@ -304,8 +303,9 @@ symlink()
 	########################################################################
 	## MAIN
 	########################################################################
-	local verbose=false #Comment to reduce verbosity
+	local verbose=true #Comment to reduce verbosity
 	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+	[ -L "$DOTFILES_ROOT" ] &&  local DOTFILES_ROOT=$(readlink "$DOTFILES_ROOT")
 	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
 	
 
