@@ -303,7 +303,7 @@ symlink()
 	########################################################################
 	## MAIN
 	########################################################################
-	local verbose=true #Comment to reduce verbosity
+	local verbose=false #Comment to reduce verbosity
 	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 	[ -L "$DOTFILES_ROOT" ] &&  local DOTFILES_ROOT=$(readlink "$DOTFILES_ROOT")
 	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
