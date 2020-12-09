@@ -357,7 +357,7 @@ symlink()
 	{
 		local host=$1
 		local local_dotfiles_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-		local remote_dotfiles_dir=".dotfiles2"
+		local remote_dotfiles_dir=".dotfiles"
 		local include_filter_file="/tmp/andresgongora_dotfiles_include.filter"		
 		
 
