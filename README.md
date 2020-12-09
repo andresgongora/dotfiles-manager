@@ -1,22 +1,22 @@
 **andresgongora's dotfiles** is an ultra simple multi-system dotfiles manager
   
 Dotfiles are how you personalize and configure your system. Be it your bashrc
-file where you write your favorite aliases or run scripts, or your applications'
-user configuration.
+file, where you write your favorite aliases or run scripts, or your 
+applications' user configuration.
 
 Instead of reconfiguring each of your machines independently or copying your
-configuration files manually, you can simply use this "dotfiles" helper
-to keep all your sysmtems (or part of them) syncrhonized. These brings the
+configuration files manually, you can simply use this "dotfiles helper"
+to keep all your sysmtems (or part of them) syncrhonized. These has the
 following benefits.
 
-- All configuration files that are important to _you_ are in a single place
-  rather than all over your system. The included `symlink.sh` script will
-  create symbolink links (aka shortcuts) in all the needed places.
-- Dotfiles can be easily synchronized as a git repository.
-- You can easily sync several machines with the same configuration, or decide
-  what parts they should share and what parts are unique. These also applies
-  for different users on the same machine. Now you have full control over your
-  user's configuration and root's configuration.
+- You can put all dotfiles files that are important to _you_ are in a single
+  place rather than having them all over your system. The included `symlink.sh`
+  script will create symbolink links (aka shortcuts) in all the needed places.
+- Dotfiles can be easily synchronized as a git repository, using a cloud storage
+  (e.g. Nextcloud), or from a central system over SSH, among others.
+- You can apply the same configuration to several machines, or decide
+  what parts they should share and what parts are unique. This also applies
+  for different users on the same machine. 
 
 
 
@@ -28,47 +28,52 @@ following benefits.
 #                                     Setup
 <!--------------------------------------+-------------------------------------->
 
+You may find specific details about the script in the next section. This section
+only covers the setup process to get stated.
+
 To install and use my dotfiles, simply clone this repository anywhere you want 
-(recommended under ~/.dotfiles) with the following command.
+(recommended under `~/.dotfiles`) with the following command. 
 
 ```sh
 git clone --recursive https://github.com/andresgongora/dotfiles.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
-Then, place all the configuartion files you want under `/.config/` and your
-"original" configuration files under `/.dotfiles/`. Finally, run `symlink.sh` 
-and follow the instructions on screen.
+Then, place all the configuartion files you want under `~/.dotfiles/config/` 
+and your "original" configuration files under `~/.dotfiles/dotfiles/`.
+Just have a look at the included examples, it should be straight forward. 
+Feel free to delete the examples once you no longer need them. 
+
+Finally, run `symlink.sh` and follow the instructions on screen if prompted.
 
 ```sh
 ./symlink.sh
 ```
 
 
-### Sync with github
+
+### Sync with GitHub
 
 If you want to synchronize your files with github, instead of cloning my
 repository, fork it and then clone yours (do not forget to do it recursively,
 as this depends on [bash-tools](https://github.com/andresgongora/bash-tools)).
-Then follow the installation and configuration procedure just as before, and 
-you will be able to push your files to Github or any other site you like.
-This might look like:
 
-Then:
 
 ```sh
 git clone --recusrive https://github.com/YOURGITHUBUSER/dotfiles.git ~/.dotfiles
-cd ~/.dotfiles                                                          # cd to new folder
+cd ~/.dotfiles
 ```
-Add your files, links, targets, etc. and link them
+
+Then, follow the installation and configuration procedure described above. That
+is, create your own `config/` and `dotfiles/` using the included examples before
+linking everything with:
 
 ```sh
 ./symlink.sh
 ```
 
-Now, you may also sync all your files with Github
-
-Now, if you want to update changes to your own dotfiles on github
+Once you are pleased with the result, you may sync everything to your git
+repository. This might look as follows:
 
 ```sh
 cd ~/.dotfiles
@@ -77,6 +82,37 @@ git commit -m "Updating my dotfiles"
 git push
 ```
 
+Finally, you can clone your forked repository on any other machine and you will
+have your dotfiles at hand. Just do not forget to symlink them with 
+`./symlink.sh`.
+
+**WARNING**: For security reasons and to avoid accidental uploads, this
+repository (forked or now) has a `.gitignore` file that will (should) prevent
+you from adding any folder that is named `ssh` or `gnupg`. These usually contain
+private keys/data that should _never_ be made public, even if you put a
+passphrase on them. But you are free to edit these rules if your case scenario
+requires it.
+
+
+
+### Sync over SSH
+
+If you do not trust a git repository with your data, you can also copy and
+link all your dotfiles over ssh. Simply place all configuration and files under
+`config/` and `dotfiles/`, respectively, as in the standard setup process.
+Then run the following command to copy _only_ the dotfiles to be symlinked and
+to the remote machine and run the script there (replace `USER` and `HOST`):
+
+```sh
+symlink.sh \
+	-c ./config/USER@HOST.config \
+	--ssh USER@HOST
+```
+
+If your local and remote user are the same, you do not need to specify it after
+`--ssh HOST`. Likewise, if you have specified an SSH alias for the remote host,
+you may use that instead.
+
 
 
 
@@ -84,7 +120,7 @@ git push
 
 <br/><br/>
 <!--------------------------------------+-------------------------------------->
-#                                    Overview
+#                              Overview and details
 <!--------------------------------------+-------------------------------------->
 
 `symlink.sh` will traverse `./config` and all subdirectories in search for any
@@ -166,5 +202,22 @@ script again to parse configuration files one more time, but made it a bit
 smarter this time. 
 
 Note that there are many great dotfile scripts out there.
- Mine is just yet another of them. But I had lots of fun (re)writing it :)
+Mine is just yet another of them. But I had lots of fun (re)writing it :)
+
+
+
+
+
+
+<!--------------------------------------+-------------------------------------->
+#                                    License
+<!--------------------------------------+-------------------------------------->
+
+Copyright (c) 2014-2021, Andres Gongora - www.andresgongora.com
+
+* This software is released under a GPLv3 license.
+  Read [license-GPLv3.txt](LICENSE),
+  or if not present, <http://www.gnu.org/licenses/>.
+* If you need a closed-source version of this software
+  for commercial purposes, please contact the [authors](AUTHORS.md).
 
