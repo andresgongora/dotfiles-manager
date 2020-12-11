@@ -103,12 +103,19 @@ link all your dotfiles over ssh. Simply place all configuration and files under
 Then run the following command to copy _only_ the dotfiles to be symlinked and
 to the remote machine and run the script there (replace `USER` and `HOST`).
 
-You may choose between `rsync` and `unison` for the sync process.
+You may choose between `rsync` and `unison` for the sync process. This tool
+will take care of syncing your local and remote files (see below for their
+advantages and disadvantages). For both option, only the files that are relevant
+to your remote system will be copied (for security reasons).
+
+### --ssh
+
+This command tells dotfiles that you want to emplace your files on a remotely.
 If your local and remote user are the same, you do not need to specify it after
-`--ssh HOST`. Likewise, if you have specified an SSH alias for the remote host,
+`--ssh HOST-ALIAS`. Likewise, if you have specified an SSH alias for the remote host,
 you may use that instead.
 
-### rsync
+### --rsync
 `rsync` only needs to be installed locally. However, it is unidirectional,
   meaning that all remote files will be overwriten with your local copy.
   
@@ -119,7 +126,7 @@ symlink.sh \
 	--rsync
 ```
 
-### unison
+### --unison
 `unison` needs to be installed in both machines (i.e. local and remote),
 but it is bidirectional. After the first sync, any change you mande on the
 remote machine will be synced back to your local copy.
