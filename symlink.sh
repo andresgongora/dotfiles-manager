@@ -417,6 +417,7 @@ symlink()
 			echo "owner = false" >> $unison_config_file
 			echo "prefer = newer" >> $unison_config_file
 			echo "batch = true" >> $unison_config_file
+			[ $VERBOSE == false  ] && echo "silent = true" >> $unison_config_file
 			
 			echo "" >> $unison_config_file
 			echo "# Sync" >> $unison_config_file
