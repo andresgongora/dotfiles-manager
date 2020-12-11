@@ -346,7 +346,7 @@ symlink()
 	########################################################################
 	## @brief Copy dotfiles and create symlinks on remote machine.
 	##
-	## Copies with rsync all your files to the specified target and
+	## Copies with rsync/unison all your files to the specified target and
 	## symlinks the configuartion in place. This function relies heavily
 	## on `rsync`'s include and exclude rules.
 	##
@@ -362,18 +362,25 @@ symlink()
 		
 
 		## INCLUDE ALL FILES LISTED BY `parseConfig`
-		echo "" > "$include_filter_file"
+		## Edit file/dir paths to convert into filters
+		echo "" > $include_filter_file
 		cat $DOTFILES_CFG_LIST_FILE >> $include_filter_file
 		cat $DOTFILES_SRC_LIST_FILE >> $include_filter_file
-		sed -i '/^$/d;s/$/**/;s/\.\///' $include_filter_file
-		sed -i "s:$local_dotfiles_dir/::" $include_filter_file
+		sed -i '/^$/d;s/$//;s/\.\///' $include_filter_file
+		sed -i "s:$local_dotfiles_dir/::" $include_filter_file	
+		[ $VERBOSE == true ] && \
+			printInfo "Local files to be copied:\n" &&\
+			cat $include_filter_file && echo ""
+			
 		
-
-		## COPY FILES AND RUN SYMLINK SCRIPT THERE
-		printInfo "Symlinking host '$host':\n"
-		rsync \
-			-ahP \
-			--delete-excluded \
+		syncWithRsync()
+		{
+			sed -i 's/$/**/' $include_filter_file
+			
+						
+			printInfo "Sending local files to '$host' with rsync, this is unidirectional"			
+			rsync \
+			-rlptDhP \
 			--prune-empty-dirs \
 			--exclude=".git**" \
 			--include="*/" \
@@ -382,13 +389,77 @@ symlink()
 			--include-from=$include_filter_file \
 			--exclude="*" \
 			"$local_dotfiles_dir/" \
-			"${host}:$remote_dotfiles_dir" \
-		&& \
-		ssh "$host" "~/$remote_dotfiles_dir/symlink.sh --backup"
+			"${host}:~/$remote_dotfiles_dir" \
+			&& printSuccess "rsync successful" && return 0 \
+			|| printError "rsync failed" && return 1		
+		}
+		
+		
+		syncWithUnison()
+		{
+			local unison_profile="andresgongora_dotfiles_unison_config.prf"
+			local unison_dir="$HOME/.unison"
+			local unison_config_file="$unison_dir/$unison_profile"			
+			local local_path=$local_dotfiles_dir
+			local remote_path="ssh://${host}/$remote_dotfiles_dir"	
+						
+			
+			## CREATE UNISON RULES
+			mkdir -p $unison_dir && echo "" > $unison_config_file
+			echo "# Roots of the synchronization" >> $unison_config_file
+			echo "root = $local_path" >> $unison_config_file
+			echo "root = $remote_path" >> $unison_config_file
+			
+			echo "" >> $unison_config_file
+			echo "# Config" >> $unison_config_file
+			echo "times = true" >> $unison_config_file
+			echo "auto = true" >> $unison_config_file
+			echo "owner = false" >> $unison_config_file
+			echo "prefer = newer" >> $unison_config_file
+			echo "batch = true" >> $unison_config_file
+			
+			echo "" >> $unison_config_file
+			echo "# Sync" >> $unison_config_file
+			echo "path = bash-tools" >> $unison_config_file
+			echo "path = symlink.sh" >> $unison_config_file
+			while read line; do
+				echo "path = $line" >> $unison_config_file
+			done <$include_filter_file
+			
+			
+			[ $VERBOSE == true ] && \
+				printInfo "unison config" &&\
+				cat $unison_config_file && echo ""
+				
+				
+			printInfo "Syncing local files with '$host' with unison"
+			printInfo "unison must be installed on the remote machine"
+			unison $unison_profile && rm $unison_config_file \
+			&& printSuccess "Unison successful" && return 0 \
+			|| printError "Unison failed" && return 1				
+		}	
+		
+		case "$SSH_SYNC_METHOD" in
+			"rsync")
+				syncWithRsync || exit 1
+				;;
+				
+			"unison")
+				syncWithUnison || exit 1
+				;;			
+
+			*)		
+				printError "Sync method '$SSH_SYNC_METHOD' not supported"; exit 1
+		esac
 		
 		rm "$include_filter_file"
+		
+		printInfo "Running symlink script remotely..."
+		ssh "$host" "~/$remote_dotfiles_dir/symlink.sh --backup" \
+		&& printSuccess "SSH connection successful" \
+		|| printError "Failed to connect over SSH"	
 	}
-
+	
 
 
 
@@ -418,6 +489,7 @@ symlink()
 	local verbose=false
 	local run_cmd="parseConfigDir"
 	local use_ssh=false
+	local ssh_sync_method=""
 	local ssh_arg=""
 	local global_action=""
 	local config="$DOTFILES_ROOT/config"
@@ -432,6 +504,24 @@ symlink()
 				local use_ssh=true
 				local ssh_arg=$1
 				shift
+				;;
+				
+			"--unison")
+				if [ -z "$ssh_sync_method" ]; then
+					local ssh_sync_method="unison"
+				else
+					printError "SSH sync methond already set, can not use --unison as well" 
+					exit 1
+				fi
+				;;
+				
+			"--rsync")
+				if [ -z "$ssh_sync_method" ]; then
+					local ssh_sync_method="rsync"
+				else
+					printError "SSH sync methond already set, can not use --rsync as well" 
+					exit 1
+				fi
 				;;
 
 			"-v"|"--verbose")
@@ -469,14 +559,21 @@ symlink()
 	
 	## APPLY ARGUMENTS
 	GLOBAL_ACTION=$global_action
-	VERBOSE=$verbose
+	VERBOSE=$verbose	
 	
 		
 	if [ $use_ssh == true ]; then
-		printHeader "Linking your dotfiles over SSH..."
-		LIST_FILES_ONLY=true
-		parseConfig $config
-		sshSymlink $ssh_arg		
+		if [ -z "$ssh_sync_method" ]; then
+			printError "When syncing over SSH, you must specify a sync method. Currently supported:"
+			printText "--rsync: unidirectional, remote files will be overwritten"
+			printText "--unison: bidirectional, requires unison to be installed on remote machine"
+		else
+			printHeader "Linking your dotfiles over SSH..."
+			SSH_SYNC_METHOD=$ssh_sync_method
+			LIST_FILES_ONLY=true
+			parseConfig $config
+			sshSymlink $ssh_arg
+		fi	
 	else
 		printHeader "Linking your dotfiles files..."
 		[ $VERBOSE == true ] && printInfo "Parsing $config"

@@ -52,7 +52,7 @@ Finally, run `symlink.sh` and follow the instructions on screen if prompted.
 
 
 
-### Sync with GitHub
+## Sync with GitHub
 
 If you want to synchronize your files with github, instead of cloning my
 repository, fork it and then clone yours (do not forget to do it recursively,
@@ -95,23 +95,41 @@ requires it.
 
 
 
-### Sync over SSH
+## Sync over SSH
 
 If you do not trust a git repository with your data, you can also copy and
 link all your dotfiles over ssh. Simply place all configuration and files under
 `config/` and `dotfiles/`, respectively, as in the standard setup process.
 Then run the following command to copy _only_ the dotfiles to be symlinked and
-to the remote machine and run the script there (replace `USER` and `HOST`):
+to the remote machine and run the script there (replace `USER` and `HOST`).
 
+You may choose between `rsync` and `unison` for the sync process.
+If your local and remote user are the same, you do not need to specify it after
+`--ssh HOST`. Likewise, if you have specified an SSH alias for the remote host,
+you may use that instead.
+
+### rsync
+`rsync` only needs to be installed locally. However, it is unidirectional,
+  meaning that all remote files will be overwriten with your local copy.
+  
 ```sh
 symlink.sh \
 	-c ./config/USER@HOST.config \
 	--ssh USER@HOST
+	--rsync
 ```
 
-If your local and remote user are the same, you do not need to specify it after
-`--ssh HOST`. Likewise, if you have specified an SSH alias for the remote host,
-you may use that instead.
+### unison
+`unison` needs to be installed in both machines (i.e. local and remote),
+but it is bidirectional. After the first sync, any change you mande on the
+remote machine will be synced back to your local copy.
+  
+```sh
+symlink.sh \
+	-c ./config/USER@HOST.config \
+	--ssh USER@HOST
+	--unison
+```
 
 
 
