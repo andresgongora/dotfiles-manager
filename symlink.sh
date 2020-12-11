@@ -368,9 +368,10 @@ symlink()
 		cat $DOTFILES_SRC_LIST_FILE >> $include_filter_file
 		sed -i '/^$/d;s/$//;s/\.\///' $include_filter_file
 		sed -i "s:$local_dotfiles_dir/::" $include_filter_file	
-		[ $VERBOSE == true ] && \
-			printInfo "Local files to be copied:\n" &&\
-			cat $include_filter_file && echo ""
+		[ $VERBOSE == true ] \
+			&& printInfo "Local files to be copied:" \
+			&& echo "" \
+			&& cat $include_filter_file
 			
 		
 		syncWithRsync()
@@ -378,20 +379,23 @@ symlink()
 			sed -i 's/$/**/' $include_filter_file
 			
 						
-			printInfo "Sending local files to '$host' with rsync, this is unidirectional"			
+			printInfo "Sending local files to '$host' with rsync, this is unidirectional"				
+			[ $VERBOSE == true ] && echo ""
 			rsync \
-			-rlptDhP \
-			--prune-empty-dirs \
-			--exclude=".git**" \
-			--include="*/" \
-			--include="symlink.sh" \
-			--include="bash-tools/**" \
-			--include-from=$include_filter_file \
-			--exclude="*" \
-			"$local_dotfiles_dir/" \
-			"${host}:~/$remote_dotfiles_dir" \
-			&& printSuccess "rsync successful" && return 0 \
-			|| printError "rsync failed" && return 1		
+				-rlptDhP \
+				--prune-empty-dirs \
+				--exclude=".git**" \
+				--include="*/" \
+				--include="symlink.sh" \
+				--include="bash-tools/**" \
+				--include-from=$include_filter_file \
+				--exclude="*" \
+				"$local_dotfiles_dir/" \
+				"${host}:~/$remote_dotfiles_dir"
+			local return=$?	
+			[ $VERBOSE == true ] && echo ""
+			[ $return != 0 ] && printError "rsync failed" && return 1 \
+			||printSuccess "rsync successful" && return 0 		 		
 		}
 		
 		
@@ -429,15 +433,23 @@ symlink()
 			
 			
 			[ $VERBOSE == true ] && \
-				printInfo "unison config" &&\
-				cat $unison_config_file && echo ""
+				printInfo "Unison config:" \
+				&& echo "" \
+				&& cat $unison_config_file \
+				&& echo ""
+			
 				
-				
-			printInfo "Syncing local files with '$host' with unison"
-			printInfo "unison must be installed on the remote machine"
-			unison $unison_profile && rm $unison_config_file \
-			&& printSuccess "Unison successful" && return 0 \
-			|| printError "Unison failed" && return 1				
+			printInfo "Syncing local files with '$host' with Unison"
+			printInfo "Remember: Unison must be installed on the remote machine"
+			
+
+			[ $VERBOSE == true ] && echo ""
+			unison $unison_profile
+			local return=$?
+			[ $VERBOSE == true ] && echo ""
+			rm $unison_config_file
+			[ $return != 0 ] && printError "Unison failed" && return 1 \
+			||printSuccess "Unison successful" && return 0 
 		}	
 		
 		case "$SSH_SYNC_METHOD" in
