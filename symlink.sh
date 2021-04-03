@@ -34,15 +34,15 @@
 ##	`~/.bashrc`). The second path is relative to this folder's `./dotfiles/`
 ##	and indicates the "original" file you want to link. Both paths must be
 ##	spearated by spaces or tabs. If you want to add spaces _within_ any of
-##	the path, you must escape them with `\` 
+##	the path, you must escape them with `\`
 ##	(e.g. `/home/user/folder\ with\ many\ spaces/`).
-##	
+##
 ##	Your symlink-config files may also have include statements to other
 ##	config files that may no longer match `$USER@$HOME.config`. This is
 ##	useful if you want to share the configuration among several machines.
 ##	To include a config file, just add a line that starts with `include`
 ##	followed by the relative path (under `./config/`) to the configuration
-##	file. For example, you can have `.config/bob@pc.config` and 
+##	file. For example, you can have `.config/bob@pc.config` and
 ##	`.config/bob@laptopt.config` both containing a  single line
 ##	`include shared/home.config`, and then a file
 ##	`.config/shared/home.config` with your actual symlink configuration.
@@ -62,20 +62,20 @@ symlink()
 	parseConfig()
 	{
 		local config=$1
-		
+
 		if [ -z $config ]; then
 			printError "No config target specified"
 			exit 1
 		elif [ -d $config ]; then
-			parseConfigDir $config	
+			parseConfigDir $config
 		else # is file
 			parseConfigFile $config
-		fi	
+		fi
 	}
-	
-	
-	
-	
+
+
+
+
 
 
 	########################################################################
@@ -127,7 +127,7 @@ symlink()
 	## The path of the configuration files to be included and
 	## any src file (original to create link to) are relative to
 	## to dotfiles/config/ and dotfiles/doftfiles respectively.
-	## 
+	##
 	## To ensure orderly processing, all includes and links are first
 	## added to separate arrays. At the end of this function, these
 	## arrays are processed (links before includes).
@@ -141,11 +141,11 @@ symlink()
 		local srcs=()
 		local dsts=()
 		local include_configs=()
-		
-		
+
+
 		printInfo "Parsing configuartion-file $config_file"
-					
-		
+
+
 		## READ LINE BY LINE
 		## -r do not interpret escape characters
 		while read -r line; do
@@ -159,18 +159,18 @@ symlink()
 			## - To avoid issues with escaped whitespaces, replace them with '\a'
 			## - Separate words
 			## - Restore escaped whitespaces
-			local line=$(echo "$line" | sed 's/\\\ /\a/g')	
+			local line=$(echo "$line" | sed 's/\\\ /\a/g')
 			local word_count=$(echo "$line" | wc -w)
 			local word_1=$(echo "$line" | cut -d " " -f 1 | sed 's/\a/ /g')
 			local word_2=$(echo "$line" | cut -d " " -f 2 | sed 's/\a/ /g')
-		
-		
+
+
 			## PROCESS LINE
 			## - Check if include -> Save in array for later
 			## - Symlink
 			## - Warn if could not process
 			if [ $word_count -eq 2 ] && [ "$word_1" = "include" ]; then
-				new_include_config="$(dirname ${config_file})/$word_2"				
+				new_include_config="$(dirname ${config_file})/$word_2"
 				if [ -f "$new_include_config" ]; then
 					[ $VERBOSE == true ] && printInfo "Found include statement $line"
 					include_configs=("${include_configs[@]}" "$new_include_config")
@@ -181,7 +181,7 @@ symlink()
 			elif [ $word_count -eq 2 ]; then
 				[ $VERBOSE == true ] && printInfo "Found link statement $line"
 				local dst="${word_1/'~'/$HOME}"
-				local src="$DOTFILES_ROOT/dotfiles/$word_2"	
+				local src="$DOTFILES_ROOT/dotfiles/$word_2"
 				dsts=("${dsts[@]}" "$dst")
 				srcs=("${srcs[@]}" "$src")
 
@@ -191,33 +191,33 @@ symlink()
 
 
 		done < "$config_file"
-		
-		
+
+
 		## PROCESS LINK LIST
 		if [ $LIST_FILES_ONLY == true ]; then
 			## STORE LISTS
 			[ $VERBOSE == true ] && printInfo "Storing link list for $config_file"
 			echo $config_file >> $DOTFILES_CFG_LIST_FILE
-		
-			for i in ${!dsts[@]}; do 
+
+			for i in ${!dsts[@]}; do
 				local src=${srcs[$i]}
-				local dst=${dsts[$i]}		
+				local dst=${dsts[$i]}
 				echo $src >> $DOTFILES_SRC_LIST_FILE
 				echo $dst >> $DOTFILES_DST_LIST_FILE
 			done
-		
-		
+
+
 		else
 			## CREATE LINKS
 			[ $verbose == true ] && printInfo "Create links..."
-			for i in "${!dsts[@]}"; do 
+			for i in "${!dsts[@]}"; do
 				local src="${srcs[$i]}"
-				local dst="${dsts[$i]}"			
+				local dst="${dsts[$i]}"
 				link "$src" "$dst"
-			done	
+			done
 		fi
-		
-		
+
+
 		## PARSE ALL INCLUDES STORED IN ARRAY
 		[ $VERBOSE == true ] && printInfo "Parsing cofiguration files included by $config_file"
 		for include_config in "${include_configs[@]}"; do
@@ -296,7 +296,7 @@ symlink()
 				local action=$(promptUser \
 				               "File already exists: $dst ($(basename "$src"))" \
 				               "[s]kip, [S]kip all, [o]verwrite, [O]verwrite all, [b]ackup, [B]ackup all?" "sSoObB" "")
-				               
+
 				case "$action" in
 					S|O|B )		GLOBAL_ACTION="$action" ;;
 					s|o|b )		;;
@@ -307,7 +307,7 @@ symlink()
 			else
 				local action="${GLOBAL_ACTION:-$action}"
 
-			fi			
+			fi
 		fi
 
 
@@ -319,16 +319,16 @@ symlink()
 		## * Create symlink
 		##
 		case "$action" in
-			a)		printSuccess "Already linked $dst" 
+			a)		printSuccess "Already linked $dst"
 					return;;
 
-			s|S)		printInfo "Skipped $src"
+			s|S)    printInfo "Skipped $src"
 					return ;;
 
-			b|B )		mv "$dst" "${dst}.backup"
+			b|B )   mv "$dst" "${dst}.backup"
 					printInfo "Moved $dst to ${dst}.backup" ;;
 
-			o|O )		rm -rf "$dst"
+			o|O )   rm -rf "$dst"
 					printWarn "Removed original $dst" ;;
 
 			l)		;; #link
@@ -337,6 +337,135 @@ symlink()
 		esac
 		ln -s "$src" "$dst" && printSuccess "$dst -> $src"
 	}
+
+
+
+
+
+
+	########################################################################
+	## @brief Helper function to copy dotfiles to a different place other
+	##        that the current, local folder.
+	##
+	########################################################################
+	syncDotfiles()
+	{
+		local target=$1
+		if [ -z "$target" ]; then
+			printError "No sync (i.e. copy) target specified for $SYNC_METHOD"
+			exit 1
+		fi
+		if [ -z "$SYNC_METHOD" ]; then
+			printError "No sync method to copy dotfiles. Currently supported:"
+			printText "--rsync: unidirectional, remote files will be overwritten"
+			printText "--unison: bidirectional, synchronizes local and remote copy"
+		fi
+
+
+		## INCLUDE ALL FILES LISTED BY `parseConfig`
+		## Edit file/dir paths to convert into filters
+		local include_filter_file="${TMP_FILE_ROOT}_include.filter"
+		echo "" > $include_filter_file
+		cat $DOTFILES_CFG_LIST_FILE >> $include_filter_file
+		cat $DOTFILES_SRC_LIST_FILE >> $include_filter_file
+		sed -i '/^$/d;s/$//;s/\.\///' $include_filter_file
+		sed -i "s:$DOTFILES_ROOT/::" $include_filter_file
+		[ $VERBOSE == true ] \
+			&& printInfo "Local files to be copied:" \
+			&& echo "" \
+			&& cat $include_filter_file
+
+
+		syncWithRsync()
+		{
+			sed -i 's/$/**/' $include_filter_file
+
+			[ $VERBOSE == true ] && echo ""
+			rsync \
+				-rlptDhP \
+				--prune-empty-dirs \
+				--exclude=".git**" \
+				--include="*/" \
+				--include="symlink.sh" \
+				--include="bash-tools/**" \
+				--include-from=$include_filter_file \
+				--exclude="*" \
+				"$local_dotfiles_dir/" \
+				"$target"
+			local return=$?
+			[ $VERBOSE == true ] && echo ""
+			[ $return != 0 ] && printError "rsync failed" && return 1 \
+			||printSuccess "rsync successful" && return 0
+		}
+
+
+		syncWithUnison()
+		{
+			local unison_profile="dotfiles_unison_config.prf"
+			local unison_dir="$HOME/.unison"
+			local unison_config_file="$unison_dir/$unison_profile"
+			local local_path=$local_dotfiles_dir
+
+
+			## CREATE UNISON RULES
+			mkdir -p $unison_dir && echo "" > $unison_config_file
+			echo "# Roots of the synchronization" >> $unison_config_file
+			echo "root = $local_path" >> $unison_config_file
+			echo "root = $target" >> $unison_config_file
+
+			echo "" >> $unison_config_file
+			echo "# Config" >> $unison_config_file
+			echo "times = true" >> $unison_config_file
+			echo "auto = true" >> $unison_config_file
+			echo "owner = false" >> $unison_config_file
+			echo "prefer = newer" >> $unison_config_file
+			echo "batch = true" >> $unison_config_file
+			[ $VERBOSE == false  ] && echo "silent = true" >> $unison_config_file
+
+			echo "" >> $unison_config_file
+			echo "# Sync" >> $unison_config_file
+			echo "path = bash-tools" >> $unison_config_file
+			echo "path = symlink.sh" >> $unison_config_file
+			while read line; do
+				echo "path = $line" >> $unison_config_file
+			done <$include_filter_file
+
+
+			[ $VERBOSE == true ] && \
+				printInfo "Unison config:" \
+				&& echo "" \
+				&& cat $unison_config_file \
+				&& echo ""
+
+
+			[ $VERBOSE == true ] && echo ""
+			unison $unison_profile
+			local return=$?
+			[ $VERBOSE == true ] && echo ""
+			rm $unison_config_file
+			[ $return != 0 ] && printError "Unison failed" && return 1 \
+			||printSuccess "Unison successful" && return 0
+		}
+
+
+		case "$SYNC_METHOD" in
+
+			"rsync")
+				printInfo "rsync local -> $target"
+				syncWithRsync || exit 1
+				;;
+
+			"unison")
+				printInfo "unison local -> $target"
+				syncWithUnison || exit 1
+				;;
+
+			*)
+				printError "Sync method '$SYNC_METHOD' not supported"; exit 1
+		esac
+		rm $include_filter_file
+	}
+
 
 
 
@@ -356,123 +485,31 @@ symlink()
 	sshSymlink()
 	{
 		local host=$1
-		local local_dotfiles_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-		local remote_dotfiles_dir=".dotfiles"
-		local include_filter_file="/tmp/andresgongora_dotfiles_include.filter"		
-		
 
-		## INCLUDE ALL FILES LISTED BY `parseConfig`
-		## Edit file/dir paths to convert into filters
-		echo "" > $include_filter_file
-		cat $DOTFILES_CFG_LIST_FILE >> $include_filter_file
-		cat $DOTFILES_SRC_LIST_FILE >> $include_filter_file
-		sed -i '/^$/d;s/$//;s/\.\///' $include_filter_file
-		sed -i "s:$local_dotfiles_dir/::" $include_filter_file	
-		[ $VERBOSE == true ] \
-			&& printInfo "Local files to be copied:" \
-			&& echo "" \
-			&& cat $include_filter_file
-			
-		
-		syncWithRsync()
-		{
-			sed -i 's/$/**/' $include_filter_file
-			
-						
-			printInfo "Sending local files to '$host' with rsync, this is unidirectional"				
-			[ $VERBOSE == true ] && echo ""
-			rsync \
-				-rlptDhP \
-				--prune-empty-dirs \
-				--exclude=".git**" \
-				--include="*/" \
-				--include="symlink.sh" \
-				--include="bash-tools/**" \
-				--include-from=$include_filter_file \
-				--exclude="*" \
-				"$local_dotfiles_dir/" \
-				"${host}:~/$remote_dotfiles_dir"
-			local return=$?	
-			[ $VERBOSE == true ] && echo ""
-			[ $return != 0 ] && printError "rsync failed" && return 1 \
-			||printSuccess "rsync successful" && return 0 		 		
-		}
-		
-		
-		syncWithUnison()
-		{
-			local unison_profile="andresgongora_dotfiles_unison_config.prf"
-			local unison_dir="$HOME/.unison"
-			local unison_config_file="$unison_dir/$unison_profile"			
-			local local_path=$local_dotfiles_dir
-			local remote_path="ssh://${host}/$remote_dotfiles_dir"	
-						
-			
-			## CREATE UNISON RULES
-			mkdir -p $unison_dir && echo "" > $unison_config_file
-			echo "# Roots of the synchronization" >> $unison_config_file
-			echo "root = $local_path" >> $unison_config_file
-			echo "root = $remote_path" >> $unison_config_file
-			
-			echo "" >> $unison_config_file
-			echo "# Config" >> $unison_config_file
-			echo "times = true" >> $unison_config_file
-			echo "auto = true" >> $unison_config_file
-			echo "owner = false" >> $unison_config_file
-			echo "prefer = newer" >> $unison_config_file
-			echo "batch = true" >> $unison_config_file
-			[ $VERBOSE == false  ] && echo "silent = true" >> $unison_config_file
-			
-			echo "" >> $unison_config_file
-			echo "# Sync" >> $unison_config_file
-			echo "path = bash-tools" >> $unison_config_file
-			echo "path = symlink.sh" >> $unison_config_file
-			while read line; do
-				echo "path = $line" >> $unison_config_file
-			done <$include_filter_file
-			
-			
-			[ $VERBOSE == true ] && \
-				printInfo "Unison config:" \
-				&& echo "" \
-				&& cat $unison_config_file \
-				&& echo ""
-			
-				
-			printInfo "Syncing local files with '$host' with Unison"
-			printInfo "Remember: Unison must be installed on the remote machine"
-			
 
-			[ $VERBOSE == true ] && echo ""
-			unison $unison_profile
-			local return=$?
-			[ $VERBOSE == true ] && echo ""
-			rm $unison_config_file
-			[ $return != 0 ] && printError "Unison failed" && return 1 \
-			||printSuccess "Unison successful" && return 0 
-		}	
-		
-		case "$SSH_SYNC_METHOD" in
+		## SYNC DOTFILES
+		case "$SYNC_METHOD" in
 			"rsync")
-				syncWithRsync || exit 1
+				local target="$host:~/$REMOTE_DOTFILES_DIR"
 				;;
-				
-			"unison")
-				syncWithUnison || exit 1
-				;;			
 
-			*)		
-				printError "Sync method '$SSH_SYNC_METHOD' not supported"; exit 1
+			"unison")
+				local target="ssh://$host/$REMOTE_DOTFILES_DIR"
+				;;
+
+			*)
+				printError "Sync method '$SYNC_METHOD' not supported in conjunction with SSH"; exit 1
 		esac
-		
-		rm "$include_filter_file"
-		
+		syncDotfiles "$target"
+
+
+		## SYMLINK OVER SSH
 		printInfo "Running symlink script remotely..."
-		ssh "$host" "~/$remote_dotfiles_dir/symlink.sh --backup" \
+		ssh "$host" "~/$REMOTE_DOTFILES_DIR/symlink.sh --backup" \
 		&& printSuccess "SSH connection successful" \
-		|| printError "Failed to connect over SSH"	
+		|| printError "Failed to connect over SSH"
 	}
-	
+
 
 
 
@@ -484,134 +521,144 @@ symlink()
 	local DOTFILES_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 	[ -L "$DOTFILES_ROOT" ] &&  local DOTFILES_ROOT=$(readlink "$DOTFILES_ROOT")
 	source "$DOTFILES_ROOT/bash-tools/bash-tools/user_io.sh"
-	
-	GLOBAL_ACTION=""
-	VERBOSE=false
-	LIST_FILES_ONLY=false
-	
-	DOTFILES_CFG_LIST_FILE="/tmp/andresgongora_dotfiles_cfgs.txt"
-	DOTFILES_SRC_LIST_FILE="/tmp/andresgongora_dotfiles_srcs.txt"
-	DOTFILES_DST_LIST_FILE="/tmp/andresgongora_dotfiles_dsts.txt"
-	
+
+	local random=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+	TMP_FILE_ROOT="/tmp/andresgongora_dotfiles"
+	DOTFILES_CFG_LIST_FILE="${TMP_FILE_ROOT}_cfgs_${random}.txt"
+	DOTFILES_SRC_LIST_FILE="${TMP_FILE_ROOT}_srcs_${random}.txt"
+	DOTFILES_DST_LIST_FILE="${TMP_FILE_ROOT}_dsts_${random}.txt"
+
 	echo "" > $DOTFILES_CFG_LIST_FILE
 	echo "" > $DOTFILES_SRC_LIST_FILE
 	echo "" > $DOTFILES_DST_LIST_FILE
-	
-	
+
+
 	## RUNTIME VARIABLES
 	local verbose=false
 	local run_cmd="parseConfigDir"
-	local use_ssh=false
-	local ssh_sync_method=""
-	local ssh_arg=""
+	local symlink_mode=""
+	local sync_method=""
+	local sync_target=""
 	local global_action=""
+	local sudo_user=""
 	local config="$DOTFILES_ROOT/config"
-	
-	
+	local target_dir=".dotfiles"
+
+
 	## PROCESS ARGUMENTS
 	while (( "$#" )); do
 		local cmd="$1"
 		shift
 		case "$cmd" in
 			"--ssh")
-				local use_ssh=true
-				local ssh_arg=$1
+				if [ -z "$symlink_mode" ]; then
+					local symlink_mode="ssh"
+					local sync_target=$1
+					shift
+				else
+					printError "Symlink method already set, can not use --ssh as well"
+					exit 1
+				fi
+				;;
+
+			"--unison")
+				if [ -z "$sync_method" ]; then
+					local sync_method="unison"
+				else
+					printError "SSH sync methond already set, can not use --unison as well"
+					exit 1
+				fi
+				;;
+
+			"--rsync")
+				if [ -z "$sync_method" ]; then
+					local sync_method="rsync"
+				else
+					printError "SSH sync methond already set, can not use --rsync as well"
+					exit 1
+				fi
+				;;
+
+			"--target")
+				local target_dir=$1
 				shift
 				;;
-				
-			"--unison")
-				if [ -z "$ssh_sync_method" ]; then
-					local ssh_sync_method="unison"
-				else
-					printError "SSH sync methond already set, can not use --unison as well" 
-					exit 1
-				fi
-				;;
-				
-			"--rsync")
-				if [ -z "$ssh_sync_method" ]; then
-					local ssh_sync_method="rsync"
-				else
-					printError "SSH sync methond already set, can not use --rsync as well" 
-					exit 1
-				fi
-				;;
+
 
 			"-v"|"--verbose")
 				local verbose=true
 				;;
-			
+
 			"-B"|"--backup")
 				if [ -z "$global_action" ]; then
 					local global_action="B"
 				else
-					printError "Global action already set, can not use --backup as well" 
+					printError "Global action already set, can not use --backup as well"
 					exit 1
 				fi
 				;;
-				
+
 			"-O"|"--overwrite")
 				if [ -z "$global_action" ]; then
 					local global_action="O"
 				else
-					printError "Global action already set, can not use --overwrite as well" 
+					printError "Global action already set, can not use --overwrite as well"
 					exit 1
 				fi
 				;;
-				
+
 			"-c"|"--config")
 				local config=$1
 				shift
-				;;				
+				;;
 
-			*)		
+			*)
 				printError "Invalid argument '$cmd'"; exit 1
 		esac
 	done
-	
-	
+
+
 	## APPLY ARGUMENTS
+	LIST_FILES_ONLY=false
 	GLOBAL_ACTION=$global_action
-	VERBOSE=$verbose	
-	
-		
-	if [ $use_ssh == true ]; then
-		if [ -z "$ssh_sync_method" ]; then
-			printError "When syncing over SSH, you must specify a sync method. Currently supported:"
-			printText "--rsync: unidirectional, remote files will be overwritten"
-			printText "--unison: bidirectional, requires unison to be installed on remote machine"
-		else
-			printHeader "Linking your dotfiles over SSH..."
-			SSH_SYNC_METHOD=$ssh_sync_method
-			LIST_FILES_ONLY=true
-			parseConfig $config
-			sshSymlink $ssh_arg
-		fi	
-	else
+	VERBOSE=$verbose
+	REMOTE_DOTFILES_DIR="$target_dir"
+	SYNC_METHOD=$sync_method
+
+	if [ -z "$symlink_mode" ]; then
+		local symlink_mode="local"
+	fi
+
+
+	## RUN
+	if [ $symlink_mode == "ssh" ]; then
+		printHeader "Linking your dotfiles over SSH..."
+		LIST_FILES_ONLY=true
+		parseConfig $config
+		sshSymlink $sync_target
+
+	elif [ $symlink_mode == "local" ]; then
 		printHeader "Linking your dotfiles files..."
 		[ $VERBOSE == true ] && printInfo "Parsing $config"
 		parseConfig $config
-	fi
-		
-	
-	## CREATE `~/.dotfiles`
-	## If linking was successful, and your dotfiles folder is not stored
-	## under `~/.dotfiles`, create a symlink at said location .
-	local dotfiles_symlink="$HOME/.dotfiles"
-	if [ ! -d "$dotfiles_symlink" ]; then 
-		link "$DOTFILES_ROOT" "$HOME/.dotfiles"
-	fi
-	
 
+		## CREATE `~/.dotfiles`
+		## If linking was successful, and your dotfiles folder is not stored
+		## under `~/.dotfiles`, create a symlink at said location .
+		local dotfiles_symlink="$HOME/$REMOTE_DOTFILES_DIR"
+		if [ ! -d "$dotfiles_symlink" ]; then
+			link "$DOTFILES_ROOT" "$dotfiles_symlink"
+		fi
+
+	else
+		printError "Unsoported symlink mode $symlink_mode"
+		exit 1
+	fi
+
+
+	rm $DOTFILES_CFG_LIST_FILE
+	rm $DOTFILES_SRC_LIST_FILE
+	rm $DOTFILES_DST_LIST_FILE
 }
 
 (symlink $@)
-
-
-
-
-
-
-
-
-

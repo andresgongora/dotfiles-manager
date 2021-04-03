@@ -116,8 +116,8 @@ If your local and remote user are the same, you do not need to specify it after
 you may use that instead.
 
 ### --rsync
-`rsync` only needs to be installed locally. However, it is unidirectional,
-  meaning that all remote files will be overwriten with your local copy.
+`rsync` is unidirectional, meaning that all remote files will be overwriten
+with your local copy.
   
 ```sh
 symlink.sh \
@@ -127,8 +127,8 @@ symlink.sh \
 ```
 
 ### --unison
-`unison` needs to be installed in both machines (i.e. local and remote),
-but it is bidirectional. After the first sync, any change you mande on the
+`unison` needs to be installed in both machines (i.e. local and remote) and
+is bidirectional. After the first sync, any change you mande on the
 remote machine will be synced back to your local copy.
   
 ```sh
