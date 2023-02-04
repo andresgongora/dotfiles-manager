@@ -1,4 +1,3 @@
-## Prevent users from uploading private data
-dotfiles/**/ssh/*
-dotfiles/**/gnupg/*
-originals/
+## Prevent users from uploading private data, this is a safety mechanism
+originals/**/ssh/*
+originals/**/gnupg/*

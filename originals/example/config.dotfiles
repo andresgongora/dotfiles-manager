@@ -1,0 +1,16 @@
+################################################################################
+#	INCLUDE OTHER CONFIGURATION FILES
+################################################################################
+
+
+################################################################################
+#	SYMLINK FILES & DIRECTORIES
+# 	---------------------------
+#
+# WHERE TO PUT THE SYMLINK			SYMLINKED FILE INSIDE DOTFILES/
+# v v v v v v v v v v v v 			v v v v v v v v v v v v v v v v
+################################################################################
+
+
+## SYSTEM FILES
+~/another_example_file			    another_example_file

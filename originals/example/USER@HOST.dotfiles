@@ -2,7 +2,7 @@
 #	INCLUDE OTHER CONFIGURATION FILES
 ################################################################################
 
-include						example.config
+include	 config.dotfiles
 
 
 ################################################################################
@@ -15,5 +15,4 @@ include						example.config
 
 
 ## SYSTEM FILES
-~/this-file-is-a-symlink			example-file
-
+~/this-file-is-a-symlink			example_file
