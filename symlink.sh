@@ -2,7 +2,7 @@
 
 ##  +-----------------------------------+-----------------------------------+
 ##  |                                                                       |
-##  | Copyright (c) 2016-2020, Andres Gongora <mail@andresgongora.com>.     |
+##  | Copyright (c) 2016-2023, Andres Gongora <mail@andresgongora.com>.     |
 ##  |                                                                       |
 ##  | This program is free software: you can redistribute it and/or modify  |
 ##  | it under the terms of the GNU General Public License as published by  |
@@ -26,12 +26,12 @@
 ##	DESCRIPTION:
 ##	Run this script to symlink all your config files under "dotfiles".
 ##
-##	`symlink.sh` will traverse `./config` and all subdirectories in search
-##	for any config file whose name matches `$USER@$HOME.config`. Any valid
-##	config file will be parsed line by line. Each line must contain two
+##	`symlink.sh` will traverse your orignal dotfiles and all subdirectories in
+##	search for any config file whose name matches `$USER@$HOME.config`. Any
+##	valid config file will be parsed line by line. Each line must contain two
 ##	paths. The first path is where you want to link your file to
 ##	(i.e. where your system expects to find a given file, like for example
-##	`~/.bashrc`). The second path is relative to this folder's `./dotfiles/`
+##	`~/.bashrc`). The second path is relative to this folder's `originals/`
 ##	and indicates the "original" file you want to link. Both paths must be
 ##	spearated by spaces or tabs. If you want to add spaces _within_ any of
 ##	the path, you must escape them with `\`
@@ -41,11 +41,11 @@
 ##	config files that may no longer match `$USER@$HOME.config`. This is
 ##	useful if you want to share the configuration among several machines.
 ##	To include a config file, just add a line that starts with `include`
-##	followed by the relative path (under `./config/`) to the configuration
-##	file. For example, you can have `.config/bob@pc.config` and
-##	`.config/bob@laptopt.config` both containing a  single line
+##	followed by the relative path (under `./dotfiles`) to the configuration
+##	file. For example, you can have `dotfiles/bob@pc.config` and
+##	`dotfiles/bob@laptopt.config` both containing a  single line
 ##	`include shared/home.config`, and then a file
-##	`.config/shared/home.config` with your actual symlink configuration.
+##	`dotfiles/shared/home.config` with your actual symlink configuration.
 ##
 ##
 
@@ -87,25 +87,32 @@ symlink()
 	########################################################################
 	parseConfigDir()
 	{
-		local dir=$1
+		local config_dir=$1
+		local config_dir_depth_to_go=${2:-$CONFIG_DIR_MAX_DEPTH}
 		[ $VERBOSE == true ] && printInfo "Parsing directory $dir"
 
 
-		for file in "$dir"/*; do
+		for file in "$config_dir"/*; do
 			[ -e "$file" ] || continue
 
 			## IF FILE
-			## - Check if it matches ${USER}@${HOSTNAME} -> Parse
+			## Check if it matches any fo the wollowing -> Parse
+			## - ${USER}@${HOSTNAME}.${CONFIG_EXTENSION}
+			## - *@${HOSTNAME}.${CONFIG_EXTENSION}
+			## - ${USER}@*.${CONFIG_EXTENSION}
 			if [ -f "$file" ]; then
 				local file_name=$(basename "$file" | sed 's/\*/\.\+/g')
-				if [[ "${USER}@${HOSTNAME}.config" =~ $file_name ]]; then
+				if [[ "${USER}@${HOSTNAME}.${CONFIG_EXTENSION}" =~ $file_name ]] || \
+				   [[ "*@${HOSTNAME}.${CONFIG_EXTENSION}" =~ $file_name ]] || \
+				   [[ "${USER}@*.${CONFIG_EXTENSION}" =~ $file_name ]] ; then
 					[ $verbose ] && printSuccess "Valid configuration file for ${USER}@${HOSTNAME} found: $file"
 					parseConfigFile "$file"
 				fi
 
 			## IF DIR
-			elif [ -d "$file" ]; then
-				parseConfigDir "$file"
+			## Process recursively but decrement depth
+			elif [ -d "$file" ] && [ $config_dir_depth_to_go -gt 0 ] ; then
+				parseConfigDir "$file" "$((config_dir_depth_to_go-1))"
 			fi
 		done
 	}
@@ -126,7 +133,7 @@ symlink()
 	##
 	## The path of the configuration files to be included and
 	## any src file (original to create link to) are relative to
-	## to dotfiles/config/ and dotfiles/doftfiles respectively.
+	## to dotfiles/doftfiles respectively.
 	##
 	## To ensure orderly processing, all includes and links are first
 	## added to separate arrays. At the end of this function, these
@@ -159,6 +166,7 @@ symlink()
 			## - To avoid issues with escaped whitespaces, replace them with '\a'
 			## - Separate words
 			## - Restore escaped whitespaces
+			## TODO: Find nicer solution to this hack
 			local line=$(echo "$line" | sed 's/\\\ /\a/g')
 			local word_count=$(echo "$line" | wc -w)
 			local word_1=$(echo "$line" | cut -d " " -f 1 | sed 's/\a/ /g')
@@ -167,10 +175,12 @@ symlink()
 
 			## PROCESS LINE
 			## - Check if include -> Save in array for later
-			## - Symlink
-			## - Warn if could not process
+			## - Create list of symlink -> Save in array for later
+			## - Warn if failed to process
+
+			## Include sub-config
 			if [ $word_count -eq 2 ] && [ "$word_1" = "include" ]; then
-				new_include_config="$(dirname ${config_file})/$word_2"
+				new_include_config="$(dirname "${config_file}")/"$word_2""
 				if [ -f "$new_include_config" ]; then
 					[ $VERBOSE == true ] && printInfo "Found include statement $line"
 					include_configs=("${include_configs[@]}" "$new_include_config")
@@ -178,13 +188,15 @@ symlink()
 					printError "Could not include file: $include_file"
 				fi
 
+			## Normal symlink statement
 			elif [ $word_count -eq 2 ]; then
 				[ $VERBOSE == true ] && printInfo "Found link statement $line"
 				local dst="${word_1/'~'/$HOME}"
-				local src="$DOTFILES_ROOT/dotfiles/$word_2"
+				local src="$(dirname ${config_file})/$word_2"
 				dsts=("${dsts[@]}" "$dst")
 				srcs=("${srcs[@]}" "$src")
 
+			## Line with wrong format
 			else
 				printWarn "Can not parse line in $config_file: $line"
 			fi
@@ -541,7 +553,9 @@ symlink()
 	local sync_target=""
 	local global_action=""
 	local sudo_user=""
-	local config="$DOTFILES_ROOT/config"
+	local config_dir="$DOTFILES_ROOT/originals"
+	local CONFIG_EXTENSION="dotfiles"
+	local CONFIG_DIR_MAX_DEPTH=3
 	local target_dir=".dotfiles"
 
 
@@ -634,13 +648,13 @@ symlink()
 	if [ $symlink_mode == "ssh" ]; then
 		printHeader "Linking your dotfiles over SSH..."
 		LIST_FILES_ONLY=true
-		parseConfig $config
+		parseConfig $config_dir
 		sshSymlink $sync_target
 
 	elif [ $symlink_mode == "local" ]; then
 		printHeader "Linking your dotfiles files..."
 		[ $VERBOSE == true ] && printInfo "Parsing $config"
-		parseConfig $config
+		parseConfig $config_dir
 
 		## CREATE `~/.dotfiles`
 		## If linking was successful, and your dotfiles folder is not stored
