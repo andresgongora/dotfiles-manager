@@ -29,7 +29,7 @@ following benefits.
 <!--------------------------------------+-------------------------------------->
 
 You may find specific details about the script in the next section. This section
-only covers the setup process to get stated.
+only covers the setup process to get started.
 
 To install and use my dotfiles, simply clone this repository anywhere you want
 (recommended under `~/.dotfiles`) with the following command.
@@ -40,9 +40,20 @@ cd ~/.dotfiles
 ```
 
 Then, place all the configuartion files (instructions of what to link) and your
-_original_ files under `~/.dotfiles/dotfiles/`. Just have a look at the included
+_original_ files under `~/.dotfiles/originals/`. Just have a look at the included
 examples, it should be straight forward. Feel free to delete the examples once
-you no longer need them.
+you no longer need them. All you have to know is the following:
+
+* Configuration `.dotfiles` are only applied if they match your USER
+and/or HOST name. If your user is `bob` and your machine is `server`, then
+name the file `bob@pc.dotfiles` for it to be applied. Use `*` as wild card, for
+example `*@*.dotfiles` will be applied to all systems.
+
+* Configuration files can include each other. Simply use an `include` statement
+and point to the relative path of the configuration you want to include. This
+"included" configuration does no longer have to observe the above USER and HOST
+name rule.
+
 
 Finally, run `symlink.sh` and follow the instructions on screen if prompted.
 
@@ -148,7 +159,7 @@ symlink.sh \
 #                              Overview and details
 <!--------------------------------------+-------------------------------------->
 
-`symlink.sh` will traverse `./config` and all subdirectories in search for any
+`symlink.sh` will traverse `./originals` and all subdirectories in search for any
 config file whose name matches `$USER@$HOME.config`. Any valid config file will
 be parsed line by line. Each line must contain two paths. The first path is
 where you want to link your file to (i.e. where your system expects to find
