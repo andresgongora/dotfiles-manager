@@ -31,7 +31,7 @@
 ##	valid config file will be parsed line by line. Each line must contain two
 ##	paths. The first path is where you want to link your file to
 ##	(i.e. where your system expects to find a given file, like for example
-##	`~/.bashrc`). The second path is relative to this folder's `originals/`
+##	`~/.bashrc`). The second path is relative to this folder's `dotfiles/`
 ##	and indicates the "original" file you want to link. Both paths must be
 ##	spearated by spaces or tabs. If you want to add spaces _within_ any of
 ##	the path, you must escape them with `\`
@@ -553,7 +553,7 @@ symlink()
 	local sync_target=""
 	local global_action=""
 	local sudo_user=""
-	local config_dir="$DOTFILES_ROOT/originals"
+	local config_dir="$DOTFILES_ROOT/dotfiles"
 	local CONFIG_EXTENSION="dotfiles"
 	local CONFIG_DIR_MAX_DEPTH=3
 	local target_dir=".dotfiles"

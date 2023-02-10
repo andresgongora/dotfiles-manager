@@ -1,4 +1,4 @@
-**andresgongora's dotfiles** is an ultra simple multi-system dotfiles manager
+**andresgongora's dotfiles-manager** is an ultra simple multi-system dotfiles manager
 
 Dotfiles are how you personalize and configure your system. Be it your bashrc
 file, where you write your favorite aliases or run scripts, or your
@@ -31,11 +31,11 @@ following benefits.
 You may find specific details about the script in the next section. This section
 only covers the setup process to get started.
 
-To install and use my dotfiles, simply clone this repository anywhere you want
+To install and use my dotfiles-manager, simply clone this repository anywhere you want
 (recommended under `~/.dotfiles`) with the following command.
 
 ```sh
-git clone --recursive https://github.com/andresgongora/dotfiles.git ~/.dotfiles
+git clone --recursive https://github.com/andresgongora/dotfiles-manager.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
@@ -71,7 +71,7 @@ as this depends on [bash-tools](https://github.com/andresgongora/bash-tools)).
 
 
 ```sh
-git clone --recusrive https://github.com/YOURGITHUBUSER/dotfiles.git ~/.dotfiles
+git clone --recusrive https://github.com/YOURGITHUBUSER/dotfiles-manager.git ~/.dotfiles
 cd ~/.dotfiles
 ```
 
@@ -107,6 +107,8 @@ requires it.
 
 
 ## Sync over SSH
+
+NOTE: This section needs to be updated
 
 If you do not trust a git repository with your data, you can also copy and
 link all your dotfiles over ssh. Simply place all configuration and files under
@@ -159,12 +161,12 @@ symlink.sh \
 #                              Overview and details
 <!--------------------------------------+-------------------------------------->
 
-`symlink.sh` will traverse `./originals` and all subdirectories in search for any
+`symlink.sh` will traverse `dotfiles-manager/dotfiles` and all subdirectories in search for any
 config file whose name matches `$USER@$HOME.config`. Any valid config file will
 be parsed line by line. Each line must contain two paths. The first path is
 where you want to link your file to (i.e. where your system expects to find
 a given file, like for example `~/.bashrc`). The second path is relative to
-this folder's `./dotfiles/` and indicates the "original" file you want to link.
+this folder's `./dotfiles/` and indicates the _original_ file you want to link.
 Both paths must be spearated by spaces or tabs. If you want to add spaces
 _within_ any of the path, you must escape them with `\`
 (e.g. `/home/user/folder\ with\ many\ spaces/`).
